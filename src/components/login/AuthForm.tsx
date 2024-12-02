@@ -23,6 +23,7 @@ const AuthForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address..."
             className="border border-gray-200 rounded-lg p-2 w-full"
+            autoComplete="off"
           />
           {email && (
             <button
