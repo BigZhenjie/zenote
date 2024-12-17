@@ -1,13 +1,38 @@
 import { useRef, useState } from "react";
 import { CircleX } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
 const AuthForm = () => {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("123123");
+  const [state, setState] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClear = () => {
     setEmail("");
     inputRef.current?.focus();
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    if (!email || !password) {
+      setLoading(false);
+      return;
+    }
+    try {
+      console.log("Authenticating...");
+      const result: string = await invoke("email_authenticate", { email, password });
+      setState(result);
+    } catch (error) {
+      console.error("Authentication error:", error);
+      setState("Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+
   return (
     <form className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -42,7 +67,9 @@ const AuthForm = () => {
 
       <button
         type="submit"
-        className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 py-3 font-semibold"
+        className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 py-3 font-semibold disabled:bg-blue-300"
+        onClick={handleSubmit}
+        disabled={loading}
       >
         Continue
       </button>
@@ -53,6 +80,9 @@ const AuthForm = () => {
         agree to the <span className="underline">Terms of Service</span> and
         {" "}
         <span className="underline">Privacy Policy</span>.
+      </p>
+      <p>
+        {state}
       </p>
     </form>
   );
