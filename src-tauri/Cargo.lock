@@ -5027,6 +5027,7 @@ dependencies = [
 name = "zenote"
 version = "0.1.0"
 dependencies = [
+ "dotenv",
  "serde",
  "serde_json",
  "supabase_rs",
