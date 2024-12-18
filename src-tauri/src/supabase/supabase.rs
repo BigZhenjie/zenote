@@ -3,7 +3,7 @@ use supabase_rs::SupabaseClient;
 use dotenv::dotenv;
 use std::env::var;
 
-async fn initialize_supabase_client() -> SupabaseClient {
+pub async fn initialize_supabase_client() -> SupabaseClient {
     dotenv().ok(); // Load the .env file
 
     let supabase_client: SupabaseClient =
@@ -11,3 +11,4 @@ async fn initialize_supabase_client() -> SupabaseClient {
 
     supabase_client
 }
+
