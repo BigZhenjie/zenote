@@ -17,6 +17,7 @@ pub async fn create_user(email: &str, password: &str, first_name: &str, last_nam
 #[tauri::command]
 pub async fn sign_up(email: String, password: String, first_name: String, last_name: String) -> String {
     let supabase_client = initialize_supabase_client().await;
+    print!("email: {:?}", email);
     let response = supabase_client
         .select("users")
         .columns(["email"].to_vec())

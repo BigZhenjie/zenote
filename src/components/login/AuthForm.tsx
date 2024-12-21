@@ -22,8 +22,9 @@ const AuthForm = () => {
     }
     try {
       console.log("Authenticating...");
-      const result: string = await invoke("email_authenticate", { email, password });
-      setState(result);
+      const result: string = await invoke("sign_up", { email, password, firstName: "Aidan", lastName: "Liang" });
+
+      setState(JSON.stringify(result));
     } catch (error) {
       console.error("Authentication error:", error);
       setState("Authentication failed");
