@@ -1,5 +1,7 @@
 mod supabase;
+//auth
 use crate::supabase::auth::sign_up;
+use crate::supabase::auth::check_if_email_exists;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -16,7 +18,12 @@ fn email_authenticate(email: &str, password: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![greet, email_authenticate, sign_up])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            email_authenticate,
+            sign_up,
+            check_if_email_exists
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
