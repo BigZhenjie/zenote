@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { CircleX } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { useNavigate } from "react-router-dom";
 const AuthForm = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("123123");
   const [state, setState] = useState("");
@@ -16,21 +18,25 @@ const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    //checks if email or password is empty
     if (!email || !password) {
       setLoading(false);
       return;
     }
+
     try {
-      console.log("Authenticating...");
+      //first check if email exists
       const email_exists = await invoke("check_if_email_exists", {
         email: email,
       });
-      if (email_exists) {
-        setState("Email already exists");
+      //if not exist: reroute to onboarding
+      if (!email_exists) {
+        navigate("/onboarding");
         return;
       }
 
-      setState(JSON.stringify(result));
+      //if exist: pop up password input
+      setState("Enter your password");
     } catch (error) {
       console.error("Authentication error:", error);
       setState("Authentication failed");

@@ -5,6 +5,7 @@ import LoadingCircle from "./components/LoadingCircle";
 
 // Lazy imports
 const Login = lazy(() => import("./pages/Login"));
+const OnBoarding = lazy(() => import("./pages/OnBoarding"));
 function App() {
   return (
     <HashRouter>
@@ -17,7 +18,10 @@ function App() {
       >
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/onboarding" element={<OnBoarding />} />
         </Routes>
+
+        
       </Suspense>
     </HashRouter>
   );
