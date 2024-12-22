@@ -22,8 +22,14 @@ const AuthForm = () => {
     }
     try {
       console.log("Authenticating...");
-      const result: string = await invoke("sign_up", { email, password, firstName: "Aidan", lastName: "Liang" });
-      
+      const email_exists = await invoke("check_if_email_exists", {
+        email: email,
+      });
+      if (email_exists) {
+        setState("Email already exists");
+        return;
+      }
+
       setState(JSON.stringify(result));
     } catch (error) {
       console.error("Authentication error:", error);

@@ -1,6 +1,6 @@
-import LoginHeader from "../components/login/LoginHeader";
-import OAuthGroup from "../components/login/OAuthGroup";
-import AuthForm from "../components/login/AuthForm";
+import LoginHeader from "../components/auth/LoginHeader";
+import OAuthGroup from "../components/auth/OAuthGroup";
+import AuthForm from "../components/auth/AuthForm";
 const Login = () => {
   return (
     <div className="flex justify-center items-center h-screen">
