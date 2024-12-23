@@ -1,3 +1,4 @@
+//------------------------------------------------AUTH------------------------------------------
 declare type OAuthButtonProps = {
   image: string;
   text: string;

@@ -19,6 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/onboarding" element={<OnBoarding />} />
+          {/*route for 404*/}
+          <Route path="*" element={<div>404</div>} />
         </Routes>
 
         
