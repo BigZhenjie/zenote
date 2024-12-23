@@ -1,10 +1,10 @@
 export const oauthProviders: OAuthProvider[] = [
   {
-    image: "/login/google.svg",
+    image: "/auth/google.svg",
     text: "Continue with Google",
   },
   {
-    image: "/login/apple.svg",
+    image: "/auth/apple.svg",
     text: "Continue with Apple",
   },
 ];
