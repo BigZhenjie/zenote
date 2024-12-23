@@ -7,10 +7,16 @@ const SignUpForm = () => {
     const [lastName, setLastName] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSubmit = (e) => {
+    interface FormData {
+        firstName: string;
+        lastName: string;
+        password: string;
+    }
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         // Handle form submission here
-        console.log({ firstName, lastName, password });
+        console.log({ firstName, lastName, password } as FormData);
     };
 
     return (
