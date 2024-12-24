@@ -6,6 +6,7 @@ const AuthForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("123123");
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [state, setState] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +32,7 @@ const AuthForm = () => {
       });
       //if not exist: reroute to onboarding
       if (!email_exists) {
-        navigate("/onboarding");
+        setShowCreateAccount(true);
         return;
       }
 
@@ -43,8 +44,7 @@ const AuthForm = () => {
     } finally {
       setLoading(false);
     }
-  }
-  
+  };
 
   return (
     <form className="flex flex-col gap-6">
@@ -78,6 +78,18 @@ const AuthForm = () => {
         </p>
       </div>
 
+      {showCreateAccount && (
+        <p className="text-xs text-gray-500">
+          It seems like this email is not associated with any account.{" "}
+          <span
+            className=" cursor-pointer text-blue-400"
+            onClick={() => navigate("/onboarding")}
+          >
+            Create an account
+          </span>{" "}
+          to continue.
+        </p>
+      )}
       <button
         type="submit"
         className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 py-3 font-semibold disabled:bg-blue-300"
@@ -90,13 +102,10 @@ const AuthForm = () => {
       <p className="text-xs text-gray-500 text-center">
         Your name and photo are displayed to users who invite you to a workspace
         using your email. By continuing, you acknowledge that you understand and
-        agree to the <span className="underline">Terms of Service</span> and
-        {" "}
+        agree to the <span className="underline">Terms of Service</span> and{" "}
         <span className="underline">Privacy Policy</span>.
       </p>
-      <p>
-        {state}
-      </p>
+      <p>{state}</p>
     </form>
   );
 };
