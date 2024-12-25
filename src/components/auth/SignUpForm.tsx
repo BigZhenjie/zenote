@@ -1,8 +1,11 @@
 import avatar from "/auth/avatar.png";
 import CustomInput from "./CustomInput";
 import { useState } from "react";
+import { useParams } from 'react-router-dom';
+import { invoke } from "@tauri-apps/api/core";
 
 const SignUpForm = () => {
+  const { email } = useParams();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
@@ -12,6 +15,8 @@ const SignUpForm = () => {
     firstName: string;
     lastName: string;
     password: string;
+    email: string;
+    avatar?: File;
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +33,8 @@ const SignUpForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     // Handle form submission here
-    console.log({ firstName, lastName, password } as FormData);
+    const response = invoke("test");
+    console.log(response)
   };
 
   return (

@@ -83,7 +83,7 @@ const AuthForm = () => {
           It seems like this email is not associated with any account.{" "}
           <span
             className=" cursor-pointer text-blue-400"
-            onClick={() => navigate("/onboarding")}
+            onClick={() => navigate(`/onboarding/${email}`)} 
           >
             Create an account
           </span>{" "}

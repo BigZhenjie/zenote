@@ -1,3 +1,4 @@
+use crate::supabase::supabase::initialize_storage_client;
 use crate::supabase::supabase::initialize_supabase_client;
 use serde_json::json;
 
@@ -17,11 +18,18 @@ pub async fn create_user(email: &str, password: &str, first_name: &str, last_nam
     format!("response: {:?}", response)
 }
 
+#[tauri::command]
+pub async fn test() -> String {
+    let storage_client = initialize_storage_client().await;
+    let bucket = "avatars";
+    let result = storage_client.get_bucket(&bucket).await.unwrap();
+
+    format!("response: {:?}", result)
+}
 
 #[tauri::command]
 pub async fn check_if_email_exists(email: String) -> bool {
     let supabase_client = initialize_supabase_client().await;
-
     // Check if user exists
     let response = supabase_client
         .select("users")
@@ -41,8 +49,6 @@ pub async fn check_if_email_exists(email: String) -> bool {
         Err(_e) => false,
     }
 }
-
-
 
 #[tauri::command]
 pub async fn sign_up(
