@@ -58,7 +58,7 @@ const SignUpForm = () => {
         const filePath = await invoke("save_temp_file", {
           fileBytes: Array.from(bytes),
         });
-        console.log("File saved to:", filePath);
+
         // Then upload using existing upload_file function
         const response = await invoke("upload_file", {
           bucket: "avatars",

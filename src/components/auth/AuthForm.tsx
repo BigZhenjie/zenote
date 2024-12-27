@@ -27,11 +27,14 @@ const AuthForm = () => {
 
     try {
       //first check if email exists
-      const email_exists = await invoke("check_if_email_exists", {
-        email: email,
-      });
+      const email_exists: { success: boolean; exists: boolean } = await invoke(
+        "check_if_email_exists",
+        {
+          email: email,
+        }
+      );
       //if not exist: reroute to onboarding
-      if (!email_exists) {
+      if (!email_exists.exists) {
         setShowCreateAccount(true);
         return;
       }
@@ -83,7 +86,7 @@ const AuthForm = () => {
           It seems like this email is not associated with any account.{" "}
           <span
             className=" cursor-pointer text-blue-400"
-            onClick={() => navigate(`/onboarding/${email}`)} 
+            onClick={() => navigate(`/onboarding/${email}`)}
           >
             Create an account
           </span>{" "}
