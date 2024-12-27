@@ -75,7 +75,3 @@ pub async fn save_temp_file(file_bytes: Vec<u8>) -> Result<String, String> {
 
     Ok(file_path.to_string_lossy().into_owned())
 }
-// curl -X POST "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/avatars/1.png" \
-// -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6bGlpcnJ0bW1kZXVtcnlmb3VoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMjY4NzA3MywiZXhwIjoyMDQ4MjYzMDczfQ.i3nwn9JhNvtIMrtbL3QfnR_vnDiV9UIw3y1eF85patg" \
-// -H "Content-Type: image/png" \
-// --data-binary @"/c/Users/17419/AppData/Local/Temp/avatar_e6eacb0e-90d9-4f21-a976-6d0986b0a564.png"
