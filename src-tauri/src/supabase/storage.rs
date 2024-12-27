@@ -25,10 +25,6 @@ pub async fn upload_file(
     supabase_key: &str,
 ) -> Result<serde_json::Value, String> {
     let client = Client::new();
-    println!("Supabase URL: {}", supabase_url);
-    println!("Bucket: {}", bucket);
-    println!("Path: {}", path);
-    println!("File Path: {}", file_path);
 
     // Read the file
     let mut file = File::open(file_path).map_err(|e| e.to_string())?;
