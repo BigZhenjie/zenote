@@ -1,8 +1,9 @@
 import avatar from "/auth/avatar.png";
 import CustomInput from "./CustomInput";
 import { useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/core";
+
 
 const SignUpForm = () => {
   const { email } = useParams();
@@ -10,6 +11,7 @@ const SignUpForm = () => {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [avatarImage, setAvatarImage] = useState<string>(avatar);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   interface FormData {
     firstName: string;
@@ -22,6 +24,21 @@ const SignUpForm = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (e.g., 5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+  
+      // Clean up previous URL if exists
+      if (avatarImage !== avatar) {
+        URL.revokeObjectURL(avatarImage);
+      }
+  
+      // Store file for upload
+      setAvatarFile(file);
+      
+      // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setAvatarImage(e.target?.result as string);
@@ -30,11 +47,32 @@ const SignUpForm = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission here
-    const response = invoke("test");
-    console.log(response)
+    try {
+      if (avatarFile) {
+        const arrayBuffer = await avatarFile.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+
+        // First save to temp file
+        const filePath = await invoke("save_temp_file", {
+          fileBytes: Array.from(bytes),
+        });
+        console.log("File saved to:", filePath);
+        // Then upload using existing upload_file function
+        const response = await invoke("upload_file", {
+          bucket: "avatars",
+          path: `${avatarFile.name}`,
+          filePath,
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+          supabaseKey: import.meta.env.VITE_SUPABASE_AUTH_TOKEN,
+        });
+
+        console.log("Upload successful:", response);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
   };
 
   return (

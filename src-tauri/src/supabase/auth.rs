@@ -1,4 +1,3 @@
-use crate::supabase::supabase::initialize_storage_client;
 use crate::supabase::supabase::initialize_supabase_client;
 use serde_json::json;
 
@@ -16,15 +15,6 @@ pub async fn create_user(email: &str, password: &str, first_name: &str, last_nam
         )
         .await;
     format!("response: {:?}", response)
-}
-
-#[tauri::command]
-pub async fn test() -> String {
-    let storage_client = initialize_storage_client().await;
-    let bucket = "avatars";
-    let result = storage_client.get_bucket(&bucket).await.unwrap();
-
-    format!("response: {:?}", result)
 }
 
 #[tauri::command]
