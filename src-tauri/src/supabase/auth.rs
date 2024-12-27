@@ -49,7 +49,7 @@ pub async fn sign_up(
 ) -> String {
     let supabase_client = initialize_supabase_client().await;
 
-    // Check if user exists
+    // insert into users table
     let response = supabase_client
         .select("users")
         .columns(["email"].to_vec())
