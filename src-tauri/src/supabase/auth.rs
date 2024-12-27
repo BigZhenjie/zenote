@@ -1,5 +1,10 @@
 use crate::supabase::supabase::initialize_supabase_client;
 use serde_json::json;
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
+
 
 pub async fn create_user(email: &str, password: &str, first_name: &str, last_name: &str) -> String {
     let supabase_client = initialize_supabase_client().await;
@@ -18,27 +23,42 @@ pub async fn create_user(email: &str, password: &str, first_name: &str, last_nam
 }
 
 #[tauri::command]
-pub async fn check_if_email_exists(email: String) -> bool {
+pub async fn check_if_email_exists(email: String) -> Result<serde_json::Value, String> {
+    // Initialize client
     let supabase_client = initialize_supabase_client().await;
-    // Check if user exists
-    let response = supabase_client
+
+    // Query with error handling
+    match supabase_client
         .select("users")
         .columns(["email"].to_vec())
         .eq("email", &email)
         .execute()
-        .await;
-
-    match response {
-        Ok(data) => {
-            if !data.is_empty() {
-                true
-            } else {
-                false
+        .await {
+            Ok(data) => {
+                let exists = !data.is_empty();
+                Ok(serde_json::json!({
+                    "success": true,
+                    "exists": exists
+                }))
+            },
+            Err(e) => {
+                Err(format!("Database query failed: {}", e))
             }
-        }
-        Err(_e) => false,
     }
 }
+
+fn hash_password(password: &str) -> String {
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let password_hash = argon2.hash_password(password.as_bytes(), &salt).unwrap().to_string();
+    password_hash
+}
+
+fn verify_password(password: &str, password_hash: &str) -> bool {
+    let parsed_hash = PasswordHash::new(password_hash).unwrap();
+    Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
+}
+
 
 #[tauri::command]
 pub async fn sign_up(
@@ -46,26 +66,31 @@ pub async fn sign_up(
     password: String,
     first_name: String,
     last_name: String,
-) -> String {
+    avatar_url: String
+) -> Result<serde_json::Value, String> {
     let supabase_client = initialize_supabase_client().await;
+    
+    println!("Attempting to create user with email: {}", email);
 
-    // insert into users table
     let response = supabase_client
-        .select("users")
-        .columns(["email"].to_vec())
-        .eq("email", &email)
-        .execute()
-        .await;
+        .insert("users", 
+            json!({
+                "email": email,
+                "password": hash_password(&password),
+                "first_name": first_name,
+                "last_name": last_name,
+                "avatar_url": avatar_url
+            })
+        )
+        .await
+        .map_err(|e| e.to_string())?;
 
-    match response {
-        Ok(data) => {
-            if !data.is_empty() {
-                "User already exists".to_string()
-            } else {
-                // User doesn't exist, proceed with creation
-                create_user(&email, &password, &first_name, &last_name).await
-            }
-        }
-        Err(e) => format!("Error checking user existence: {:?}", e),
+    if response.is_empty() {
+        Ok(serde_json::json!({
+            "success": true,
+            "message": "User created successfully"
+        }))
+    } else {
+        Err("User already exists".to_string())
     }
 }
