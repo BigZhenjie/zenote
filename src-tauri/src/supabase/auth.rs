@@ -85,7 +85,8 @@ pub async fn sign_up(
         .await
         .map_err(|e| e.to_string())?;
 
-    if response.is_empty() {
+        
+    if !response.is_empty() {
         Ok(serde_json::json!({
             "success": true,
             "message": "User created successfully"

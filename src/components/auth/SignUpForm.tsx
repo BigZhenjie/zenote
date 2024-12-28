@@ -12,6 +12,7 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [avatarImage, setAvatarImage] = useState<string>(avatar);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,17 +42,19 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    
     try {
+      let avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/avatars/default.png";
+
       if (avatarFile) {
         const arrayBuffer = await avatarFile.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
 
-        // First save to temp file
         const filePath = await invoke("save_temp_file", {
           fileBytes: Array.from(bytes),
         });
 
-        // Then upload using existing upload_file function
         const response: {response: string, success: boolean} = await invoke("upload_file", {
           bucket: "avatars",
           path: `${avatarFile.name}`,
@@ -60,19 +63,22 @@ const SignUpForm = () => {
           supabaseKey: import.meta.env.VITE_SUPABASE_AUTH_TOKEN,
         });
         const avatarPath: string = JSON.parse(response.response).Key;
-        const avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + avatarPath;
-
-        const sign_up_response = await invoke("sign_up", {
-          email: email,
-          password: password,
-          firstName: firstName,
-          lastName: lastName,
-          avatarUrl: avatarUrl
-        });
-        console.log("Sign up response:", sign_up_response);
+        avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + avatarPath;
       }
+
+      const sign_up_response = await invoke("sign_up", {
+        email,
+        password,
+        firstName,
+        lastName,
+        avatarUrl
+      });
+      
+      console.log("Sign up response:", sign_up_response);
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("Sign up failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,7 +143,8 @@ const SignUpForm = () => {
 
       <button
         type="submit"
-        className="mt-4 bg-[#0077D4] text-white p-2 rounded-lg hover:bg-blue-500 active:bg-[#005FA3] text-[14px] font-semibold max-w-[300px] w-full"
+        className="mt-4 bg-[#0077D4] text-white p-2 rounded-lg hover:bg-blue-500 active:bg-[#005FA3] text-[14px] font-semibold max-w-[300px] w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={loading}
       >
         Continue
       </button>
