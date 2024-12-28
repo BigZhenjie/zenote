@@ -49,10 +49,9 @@ pub async fn upload_file(
 
     let status = response.status();
     let text = response.text().await.map_err(|e| e.to_string())?;
-    println!("Response: {:?}", text);
 
     if status.is_success() {
-        Ok(serde_json::json!({"success": true}))
+        Ok(serde_json::json!({"success": true, "response": text}))
     } else {
         Err(format!("Upload failed: {}", text))
     }

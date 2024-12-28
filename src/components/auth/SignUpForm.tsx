@@ -60,15 +60,24 @@ const SignUpForm = () => {
         });
 
         // Then upload using existing upload_file function
-        const response = await invoke("upload_file", {
+        const response: {response: string, success: boolean} = await invoke("upload_file", {
           bucket: "avatars",
           path: `${avatarFile.name}`,
           filePath,
           supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
           supabaseKey: import.meta.env.VITE_SUPABASE_AUTH_TOKEN,
         });
-
-        console.log("Upload successful:", response);
+        const avatarPath: string = JSON.parse(response.response).Key;
+        const avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + avatarPath;
+        console.log("Upload successful:", avatarUrl);
+        const sign_up_response = await invoke("sign_up", {
+          email: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          avatarUrl: avatarUrl
+        });
+        console.log("Sign up response:", sign_up_response);
       }
     } catch (error) {
       console.error("Upload failed:", error);
