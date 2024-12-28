@@ -3,7 +3,7 @@ import CustomInput from "./CustomInput";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/core";
-
+import { useNavigate } from "react-router-dom";
 
 const SignUpForm = () => {
   const { email } = useParams();
@@ -13,6 +13,7 @@ const SignUpForm = () => {
   const [avatarImage, setAvatarImage] = useState<string>(avatar);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,6 +80,7 @@ const SignUpForm = () => {
       console.error("Sign up failed:", error);
     } finally {
       setLoading(false);
+      navigate("/");
     }
   };
 
