@@ -13,14 +13,6 @@ const SignUpForm = () => {
   const [avatarImage, setAvatarImage] = useState<string>(avatar);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-  interface FormData {
-    firstName: string;
-    lastName: string;
-    password: string;
-    email: string;
-    avatar?: File;
-  }
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -69,7 +61,7 @@ const SignUpForm = () => {
         });
         const avatarPath: string = JSON.parse(response.response).Key;
         const avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + avatarPath;
-        console.log("Upload successful:", avatarUrl);
+
         const sign_up_response = await invoke("sign_up", {
           email: email,
           password: password,
@@ -99,7 +91,7 @@ const SignUpForm = () => {
             <img
               src={avatarImage}
               alt="Click to upload avatar"
-              className="w-12 h-12 rounded-full hover:opacity-80"
+              className="w-12 h-12 rounded-full hover:opacity-80 object-cover"
               style={{ opacity: avatarImage === avatar ? 0.1 : 1 }}
             />
           </div>
