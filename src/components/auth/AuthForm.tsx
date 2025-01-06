@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 const AuthForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("123123");
+  const [password, setPassword] = useState("");
   const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const [state, setState] = useState("");
+  const [showPasswordField, setShowPasswordField] = useState(false);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -16,11 +16,34 @@ const AuthForm = () => {
     inputRef.current?.focus();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    if (showPasswordField) {
+      try {
+        const sign_in_response = await invoke("sign_in", {
+          email,
+          password,
+        });
+        
+        console.log("Sign in response:", sign_in_response);
+      } catch (error) {
+        console.error("Sign in failed:", error);
+      } finally {
+        setLoading(false);
+        navigate("/");
+      }
+    } else {
+      handleEmailSubmit(e);
+    }
+  }
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     //checks if email or password is empty
-    if (!email || !password) {
+    if (!email) {
       setLoading(false);
       return;
     }
@@ -40,18 +63,19 @@ const AuthForm = () => {
       }
 
       //if exist: pop up password input
-      setState("Enter your password");
+      setShowPasswordField(true);
     } catch (error) {
       console.error("Authentication error:", error);
-      setState("Authentication failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+    <form className="flex flex-col gap-6" 
+      onSubmit={handleEmailSubmit}
+    >
+      <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
           Email
         </label>
@@ -76,6 +100,19 @@ const AuthForm = () => {
             </button>
           )}
         </div>
+        {showPasswordField && <>
+          <label htmlFor="password" className="text-sm font-medium">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password..."
+            className="border border-gray-200 rounded-lg p-2 w-full"
+          />
+        </>}
         <p className="text-xs text-gray-500">
           Use an organization email to easily collaborate with teammates
         </p>
@@ -96,7 +133,6 @@ const AuthForm = () => {
       <button
         type="submit"
         className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 py-3 font-semibold disabled:bg-blue-300"
-        onClick={handleSubmit}
         disabled={loading}
       >
         Continue
@@ -108,7 +144,6 @@ const AuthForm = () => {
         agree to the <span className="underline">Terms of Service</span> and{" "}
         <span className="underline">Privacy Policy</span>.
       </p>
-      <p>{state}</p>
     </form>
   );
 };

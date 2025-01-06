@@ -5,23 +5,6 @@ use argon2::{
     Argon2,
 };
 
-
-pub async fn create_user(email: &str, password: &str, first_name: &str, last_name: &str) -> String {
-    let supabase_client = initialize_supabase_client().await;
-    let response = supabase_client
-        .insert(
-            "users",
-            json!({
-                "email": email,
-                "password": password,
-                "first_name": first_name,
-                "last_name": last_name
-            }),
-        )
-        .await;
-    format!("response: {:?}", response)
-}
-
 #[tauri::command]
 pub async fn check_if_email_exists(email: String) -> Result<serde_json::Value, String> {
     // Initialize client
@@ -93,5 +76,40 @@ pub async fn sign_up(
         }))
     } else {
         Err("User already exists".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn sign_in(
+    email: String, 
+    password: String
+) -> Result<serde_json::Value, String> {
+    let supabase_client = initialize_supabase_client().await;
+    println!("Signing in user: {}", email);
+
+    let response = supabase_client
+        .select("users")
+        .columns(["email", "password"].to_vec())
+        .eq("email", &email)
+        .execute()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    match response.first() {
+        Some(user) => {
+            let stored_hash = user.get("password")
+                .and_then(|v| v.as_str())
+                .ok_or("Invalid user data")?;
+
+            if verify_password(&password, stored_hash) {
+                Ok(serde_json::json!({
+                    "success": true,
+                    "message": "Login successful"
+                }))
+            } else {
+                Err("Invalid email or password".to_string())
+            }
+        },
+        None => Err("User not found".to_string())
     }
 }
