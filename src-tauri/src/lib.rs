@@ -2,6 +2,7 @@ mod supabase;
 //auth
 use crate::supabase::auth::check_if_email_exists;
 use crate::supabase::auth::sign_up;
+use crate::supabase::auth::sign_in;
 
 //storage
 use crate::supabase::storage::save_temp_file;
@@ -29,7 +30,8 @@ pub fn run() {
             sign_up,
             check_if_email_exists,
             save_temp_file,
-            upload_file
+            upload_file,
+            sign_in
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

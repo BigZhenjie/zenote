@@ -1,15 +1,10 @@
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use std::env;
 use std::fs::File;
 use std::io::Read;
-use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Serialize)]
-struct UploadRequest {
-    file: Vec<u8>,
-}
 
 #[derive(Deserialize)]
 struct UploadResponse {

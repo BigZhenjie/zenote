@@ -16,7 +16,7 @@ const AuthForm = () => {
     inputRef.current?.focus();
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFinalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     
@@ -71,9 +71,18 @@ const AuthForm = () => {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (email && password) {
+      handleFinalSubmit(e);
+    }else{
+      handleEmailSubmit(e);
+    }
+  }
+
   return (
     <form className="flex flex-col gap-6" 
-      onSubmit={handleEmailSubmit}
+      onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
