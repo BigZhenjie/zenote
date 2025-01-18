@@ -107,9 +107,15 @@ pub async fn sign_in(
                     "message": "Login successful"
                 }))
             } else {
-                Err("Invalid email or password".to_string())
+                Ok(serde_json::json!({
+                    "success": false,
+                    "message": "Invalid password"
+                }))
             }
         },
-        None => Err("User not found".to_string())
+        None => Ok(serde_json::json!({
+            "success": false,
+            "message": "User not found"
+        }))
     }
 }

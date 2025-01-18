@@ -9,6 +9,7 @@ const AuthForm = () => {
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showPasswordField, setShowPasswordField] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClear = () => {
@@ -19,15 +20,24 @@ const AuthForm = () => {
   const handleFinalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
-    if (showPasswordField) {
+
+    if (email && password) {
       try {
-        const sign_in_response = await invoke("sign_in", {
-          email,
-          password,
-        });
-        
-        console.log("Sign in response:", sign_in_response);
+        const sign_in_response: { success: boolean; message: string } =
+          await invoke("sign_in", {
+            email,
+            password,
+          });
+        //if not success: set error
+        if (sign_in_response.message == "User not found") {
+          setShowCreateAccount(true);
+          setShowPasswordField(false);
+          return;
+        }
+        if (!sign_in_response.success) {
+          setError(sign_in_response.message);
+          return;
+        }
       } catch (error) {
         console.error("Sign in failed:", error);
       } finally {
@@ -37,7 +47,7 @@ const AuthForm = () => {
     } else {
       handleEmailSubmit(e);
     }
-  }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,15 +85,13 @@ const AuthForm = () => {
     e.preventDefault();
     if (email && password) {
       handleFinalSubmit(e);
-    }else{
+    } else {
       handleEmailSubmit(e);
     }
-  }
+  };
 
   return (
-    <form className="flex flex-col gap-6" 
-      onSubmit={handleSubmit}
-    >
+    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
           Email
@@ -109,19 +117,22 @@ const AuthForm = () => {
             </button>
           )}
         </div>
-        {showPasswordField && <>
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password..."
-            className="border border-gray-200 rounded-lg p-2 w-full"
-          />
-        </>}
+        {showPasswordField && (
+          <>
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password..."
+              className="border border-gray-200 rounded-lg p-2 w-full"
+            />
+          </>
+        )}
+        {error && <p className="text-xs text-red-500">{error}</p>}
         <p className="text-xs text-gray-500">
           Use an organization email to easily collaborate with teammates
         </p>

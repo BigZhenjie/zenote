@@ -2,6 +2,7 @@ import "./App.css";
 import { lazy, Suspense } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import LoadingCircle from "./components/LoadingCircle";
+import Home from "./components/home/Home";
 
 // Lazy imports
 const Login = lazy(() => import("./pages/Login"));
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/onboarding/:email" element={<OnBoarding />} />
+          <Route path="/home" element={<Home />} />
           {/*route for 404*/}
           <Route path="*" element={<div>404</div>} />
         </Routes>
