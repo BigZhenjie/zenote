@@ -38,11 +38,14 @@ const AuthForm = () => {
           setError(sign_in_response.message);
           return;
         }
+
+        if (sign_in_response.success) {
+          navigate("/home");
+        }
       } catch (error) {
         console.error("Sign in failed:", error);
       } finally {
         setLoading(false);
-        navigate("/");
       }
     } else {
       handleEmailSubmit(e);
