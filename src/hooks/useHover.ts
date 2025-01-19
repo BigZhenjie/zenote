@@ -7,7 +7,7 @@ export function useHover() {
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       const distanceFromLeft = event.clientX;
-      setIsHovered(distanceFromLeft <= 100);
+      setIsHovered(distanceFromLeft <= 50);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
