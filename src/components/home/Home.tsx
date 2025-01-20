@@ -1,4 +1,4 @@
-import Sidebar from "./sidebar/Sidebar";
+import HoverSidebar from "./sidebar/HoverSidebar";
 import { Menu, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { useState } from "react";
 import { useHover } from "../../hooks/useHover";
@@ -13,11 +13,9 @@ export default function Home() {
     <div className="flex h-screen">
       {/* Sidebar and Menu Button Container */}
       <div className="flex">
-        <AnimatePresence>
-          <Sidebar isOpen={isMenuOpen} />
-        </AnimatePresence>
+         <HoverSidebar isHovered={isHoverMenu} />
 
-        <motion.div 
+        <motion.div
           ref={menuRef}
           className="hover:bg-gray-200 cursor-pointer rounded-md p-1 relative h-8 w-8 flex items-center justify-center m-3"
         >
@@ -51,7 +49,7 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <motion.main 
+      <motion.main
         className="flex-1 p-8 overflow-y-auto"
         initial={{ marginLeft: 0 }}
         transition={{ duration: 0.2 }}

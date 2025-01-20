@@ -8,28 +8,25 @@ interface SidebarProps {
 export default function Sidebar({ isOpen }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
 
   return (
     <motion.aside 
       className="h-screen bg-white border-r border-gray-200 flex flex-col"
-      initial={{ width: 0 }}
+      initial={{ x: 0 }}
       animate={{ 
-        width: isOpen ? (isCollapsed ? 64 : 240) : 0,
+        x: isOpen ? (isCollapsed ? 64 : 240) : 0,
         opacity: isOpen ? 1 : 0
       }}
       transition={{ duration: 0.2 }}
     >
       <div className="p-2 border-b border-gray-200">
-        <button 
+        {/* <button 
           className="w-full p-2 hover:bg-gray-100 rounded-md text-gray-600 flex items-center justify-center"
           onClick={toggleSidebar}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? '»' : '«'}
-        </button>
+        </button> */}
       </div>
 
       <nav className="flex-1 overflow-y-auto">
