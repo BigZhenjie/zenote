@@ -26,7 +26,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
     <motion.aside
       className="fixed z-10 rounded-md bg-slate-50 p-4 top-14 shadow-md border-slate-300"
       {...hoverAnimation(isHovered || isHovering)}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.25 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
