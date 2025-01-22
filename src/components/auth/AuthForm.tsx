@@ -2,8 +2,10 @@ import { useRef, useState } from "react";
 import { CircleX } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 const AuthForm = () => {
   const navigate = useNavigate();
+  const { login, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showCreateAccount, setShowCreateAccount] = useState(false);
@@ -23,27 +25,18 @@ const AuthForm = () => {
 
     if (email && password) {
       try {
-        const sign_in_response: { success: boolean; message: string } =
-          await invoke("sign_in", {
-            email,
-            password,
-          });
-        //if not success: set error
-        if (sign_in_response.message == "User not found") {
+        console.log("Logging in...");
+        await login(email, password);
+        console.log("Logged in successfully");
+        navigate("/home");
+      } catch (error: any) {
+        console.log("Error logging in:", error);
+        if (error.message === "User not found") {
           setShowCreateAccount(true);
           setShowPasswordField(false);
-          return;
+        } else {
+          setError(error.message);
         }
-        if (!sign_in_response.success) {
-          setError(sign_in_response.message);
-          return;
-        }
-
-        if (sign_in_response.success) {
-          navigate("/home");
-        }
-      } catch (error) {
-        console.error("Sign in failed:", error);
       } finally {
         setLoading(false);
       }
@@ -156,7 +149,7 @@ const AuthForm = () => {
       <button
         type="submit"
         className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-2 py-3 font-semibold disabled:bg-blue-300"
-        disabled={loading}
+        disabled={loading || authLoading}
       >
         Continue
       </button>
