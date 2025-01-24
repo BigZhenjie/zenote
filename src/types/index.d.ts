@@ -1,3 +1,17 @@
+//------------------------------------------------RESPONSE------------------------------------------
+export enum StatusCode {
+  Ok = 200,
+  BadRequest = 400,
+  Unauthorized = 401,
+  NotFound = 404,
+  InternalServerError = 500,
+}
+
+export type Response<T = any> = {
+  status: StatusCode;
+  data?: T;
+  error?: string;
+};
 //------------------------------------------------AUTH------------------------------------------
 declare type OAuthButtonProps = {
   image: string;

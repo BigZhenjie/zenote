@@ -3,6 +3,8 @@ import { CircleX } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Response, StatusCode } from "../../types";
+
 const AuthForm = () => {
   const navigate = useNavigate();
   const { login, loading: authLoading } = useAuth();
@@ -26,16 +28,23 @@ const AuthForm = () => {
     if (email && password) {
       try {
         console.log("Logging in...");
-        await login(email, password);
-        console.log("Logged in successfully");
+        const { status, data, error: loginError } = await login(email, password);
+        
+        if (loginError) {
+          throw { status, error: loginError };
+        }
+
+        console.log("Logged in successfully", data);
         navigate("/home");
       } catch (error: any) {
         console.log("Error logging in:", error);
-        if (error.message === "User not found") {
+        if (error.status === 404) { // User not found
           setShowCreateAccount(true);
           setShowPasswordField(false);
+        } else if (error.status === 401) { // Invalid password
+          setError("Invalid password");
         } else {
-          setError(error.message);
+          setError(error.error || "An error occurred during login");
         }
       } finally {
         setLoading(false);
@@ -48,30 +57,27 @@ const AuthForm = () => {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    //checks if email or password is empty
+    
     if (!email) {
       setLoading(false);
       return;
     }
 
     try {
-      //first check if email exists
-      const email_exists: { success: boolean; exists: boolean } = await invoke(
+      const response = await invoke<Response<boolean>>(
         "check_if_email_exists",
-        {
-          email: email,
-        }
+        { email }
       );
-      //if not exist: reroute to onboarding
-      if (!email_exists.exists) {
+
+      if (!response.data) {
         setShowCreateAccount(true);
         return;
       }
 
-      //if exist: pop up password input
       setShowPasswordField(true);
     } catch (error) {
       console.error("Authentication error:", error);
+      setError("Failed to check email existence");
     } finally {
       setLoading(false);
     }
@@ -138,7 +144,7 @@ const AuthForm = () => {
         <p className="text-xs text-gray-500">
           It seems like this email is not associated with any account.{" "}
           <span
-            className=" cursor-pointer text-blue-400"
+            className="cursor-pointer text-blue-400"
             onClick={() => navigate(`/onboarding/${email}`)}
           >
             Create an account

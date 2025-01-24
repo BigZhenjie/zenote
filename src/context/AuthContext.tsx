@@ -1,6 +1,13 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { decodeJwt, isTokenExpired } from '../utils/jwt';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { decodeJwt, isTokenExpired } from "../utils/jwt";
+import { Response, StatusCode } from "../types/index";
 
 type User = {
   email: string;
@@ -9,7 +16,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<Response<{ token: string }>>;
   logout: () => void;
   loading: boolean;
 };
@@ -22,13 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const checkSession = async () => {
-      const token = sessionStorage.getItem('authToken');
+      const token = sessionStorage.getItem("authToken");
       if (token && !isTokenExpired(token)) {
         const payload = decodeJwt(token);
         if (payload) {
           setUser({
             email: payload.email,
-            token: token
+            token: token,
           });
         }
       }
@@ -41,21 +48,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const response = await invoke<{ token: string }>('sign_in', {
-        email,
-        password
-      });
-      
-      if (response.token) {
-        sessionStorage.setItem('authToken', response.token);
-        const payload = decodeJwt(response.token);
+      const response: Response<{ token: string }> =
+        await invoke<Response<{ token: string }>>(
+          "sign_in",
+          {
+            email,
+            password,
+          }
+        );
+      console.log("Login response:", response);
+      if (response.status === StatusCode.Ok && response.data?.token) {
+        sessionStorage.setItem("authToken", response.data.token);
+        const payload = decodeJwt(response.data.token);
         if (payload) {
           setUser({
             email: payload.email,
-            token: response.token
+            token: response.data.token,
           });
         }
+        return response;
       }
+
+      if (response.status === StatusCode.Unauthorized) {
+        response.error = "Invalid email or password";
+        return response;
+      }
+
+      response.error = response.error || "Login failed";
+      return response;
     } catch (error) {
       throw error;
     } finally {
@@ -64,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem("authToken");
     setUser(null);
   };
 
