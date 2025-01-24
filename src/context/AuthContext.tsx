@@ -7,12 +7,13 @@ import {
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { decodeJwt, isTokenExpired } from "../utils/jwt";
-import { Response, StatusCode } from "../types/index";
-
+import { Response } from "../types";
+import { StatusCode } from "../constants/statusCode";
 type User = {
   email: string;
   token: string;
 };
+
 
 type AuthContextType = {
   user: User | null;

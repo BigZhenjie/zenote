@@ -3,7 +3,8 @@ import { CircleX } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Response, StatusCode } from "../../types";
+import { Response} from "../../types";
+import { StatusCode } from "../../constants/statusCode";
 
 const AuthForm = () => {
   const navigate = useNavigate();
@@ -38,10 +39,10 @@ const AuthForm = () => {
         navigate("/home");
       } catch (error: any) {
         console.log("Error logging in:", error);
-        if (error.status === 404) { // User not found
+        if (error.status === StatusCode.NotFound) { // User not found
           setShowCreateAccount(true);
           setShowPasswordField(false);
-        } else if (error.status === 401) { // Invalid password
+        } else if (error.status === StatusCode.Unauthorized) { // Invalid password
           setError("Invalid password");
         } else {
           setError(error.error || "An error occurred during login");
