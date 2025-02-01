@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "../../../context/AuthContext";
 interface HoverSidebarProps {
   isHovered: boolean;
 }
@@ -13,6 +14,7 @@ const hoverAnimation = (isHovered: boolean) => {
 
 const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
   const [isHovering, setIsHovering] = useState(false);
+  const { user } = useAuth();
 
   const handleMouseEnter = () => {
     setIsHovering(true);
@@ -30,7 +32,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div>Hover Sidebar</div>
+      <div>{user?.email}</div>
     </motion.aside>
   );
 };

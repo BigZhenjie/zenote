@@ -8,6 +8,7 @@ use jsonwebtoken::{encode, Header, EncodingKey};
 use chrono::{Utc, Duration};
 use crate::supabase::supabase::initialize_supabase_client;
 
+use crate::supabase::queries::fetch_user_entry_by_email;
 #[derive(Debug, Copy, Clone)]
 pub enum StatusCode {
     Ok = 200,
@@ -165,6 +166,8 @@ pub async fn sign_in(
                     .checked_add_signed(Duration::seconds(3600))
                     .expect("Invalid timestamp")
                     .timestamp() as usize;
+                
+let user_entry = fetch_user_entry_by_email(&email).await.map_err(|e| e.to_string())?;
 
                 let claims = Claims {
                     sub: email.clone(),
