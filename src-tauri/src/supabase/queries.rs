@@ -28,10 +28,11 @@ pub async fn fetch_user_entry_by_email(email: &str) -> Result<Option<UserEntry>,
 
 #[derive(Debug, Deserialize)]
 pub struct UserEntry {
-    id: String,
-    email: String,
-    first_name: String,
-    last_name: String,
-    avatar_url: String,
-    created_at: String
+    pub id: String,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub avatar_url: String,
+    pub created_at: String,
 }
+

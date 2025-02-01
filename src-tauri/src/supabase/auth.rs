@@ -55,6 +55,11 @@ pub struct Response<T = serde_json::Value> {
 struct Claims {
     sub: String,
     email: String,
+    user_id: String,
+    first_name: String,
+    last_name: String,
+    avatar_url: String,
+    created_at: String,
     exp: usize,
 }
 
@@ -167,11 +172,16 @@ pub async fn sign_in(
                     .expect("Invalid timestamp")
                     .timestamp() as usize;
                 
-let user_entry = fetch_user_entry_by_email(&email).await.map_err(|e| e.to_string())?;
+let user_entry = fetch_user_entry_by_email(&email).await.map_err(|e| e.to_string())?.ok_or("User not found")?;
 
                 let claims = Claims {
                     sub: email.clone(),
                     email: email,
+                    user_id: user_entry.id,
+                    first_name: user_entry.first_name,
+                    last_name: user_entry.last_name,
+                    avatar_url: user_entry.avatar_url,
+                    created_at: user_entry.created_at,
                     exp: expiration,
                 };
 
