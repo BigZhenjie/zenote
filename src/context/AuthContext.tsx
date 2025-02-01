@@ -11,6 +11,11 @@ import { Response } from "../types";
 import { StatusCode } from "../constants/statusCode";
 type User = {
   email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  createdAt: string;
+  id: string;
   token: string;
 };
 
@@ -36,7 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (payload) {
           setUser({
             email: payload.email,
-            token: token,
+            firstName: payload.first_name,
+            lastName: payload.last_name,
+            avatarUrl: payload.avatar_url,
+            createdAt: payload.created_at,
+            id: payload.user_id,
+            token,
           });
         }
       }
@@ -64,6 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (payload) {
           setUser({
             email: payload.email,
+            firstName: payload.first_name,
+            lastName: payload.last_name,
+            avatarUrl: payload.avatar_url,
+            createdAt: payload.created_at,
+            id: payload.user_id,
             token: response.data.token,
           });
         }

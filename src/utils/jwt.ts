@@ -1,6 +1,11 @@
 export interface JwtPayload {
   sub: string;
   email: string;
+  first_name: string;
+  last_name: string;
+  avatar_url: string;
+  created_at: string;
+  user_id: string;
   exp: number;
 }
 
