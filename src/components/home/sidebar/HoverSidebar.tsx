@@ -32,7 +32,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div>{user?.email}</div>
+      <div>{user?.firstName}</div>
     </motion.aside>
   );
 };
