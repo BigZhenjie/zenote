@@ -76,6 +76,7 @@ const AuthForm = () => {
       }
 
       setShowPasswordField(true);
+      setError("")
     } catch (error) {
       console.error("Authentication error:", error);
       setError("Failed to check email existence");
