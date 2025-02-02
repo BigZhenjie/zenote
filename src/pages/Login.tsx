@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import LoginHeader from "../components/auth/LoginHeader";
 import OAuthGroup from "../components/auth/OAuthGroup";
 import AuthForm from "../components/auth/AuthForm";
-import { isTokenExpired } from "../utils/jwt";
+import { isTokenExpired } from "../lib/jwt";
 
 const Login = () => {
   const navigate = useNavigate();

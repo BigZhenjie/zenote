@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SignUpForm from "../components/auth/SignUpForm";
-import { isTokenExpired } from "../utils/jwt";
+import { isTokenExpired } from "../lib/jwt";
 
 const onBoarding = () => {
   const navigate = useNavigate();
