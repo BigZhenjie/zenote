@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../context/AuthContext";
 interface HoverSidebarProps {
@@ -7,8 +7,8 @@ interface HoverSidebarProps {
 
 const hoverAnimation = (isHovered: boolean) => {
   return {
-    initial: { x: -200 },
-    animate: { x: isHovered ? 0 : -200 },
+    initial: { x: -240 },
+    animate: { x: isHovered ? 0 : -240 },
   };
 };
 
@@ -26,9 +26,9 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
 
   return (
     <motion.aside
-      className="fixed z-10 rounded-md bg-slate-50 p-4 top-14 shadow-md border-slate-300"
+      className="fixed z-10 rounded-md bg-slate-50 p-2 px-3 top-14 shadow-md border-slate-300 w-60"
       {...hoverAnimation(isHovered || isHovering)}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.15 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
