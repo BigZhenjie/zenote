@@ -157,7 +157,6 @@ pub async fn sign_in(
     password: String,
 ) -> Result<Response<serde_json::Value>, String> {
     let supabase_client = initialize_supabase_client().await;
-    println!("Signing in user: {}", email);
 
     let response = supabase_client
         .select("users")
@@ -209,7 +208,6 @@ pub async fn sign_in(
                     error: None,
                 };
 
-                println!("Returning response: {:?}", response);
                 Ok(response)
             } else {
                 Ok(Response {

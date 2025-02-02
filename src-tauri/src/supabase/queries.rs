@@ -5,7 +5,7 @@ use serde_json::Value; // Ensure this import is correct
 pub async fn fetch_user_entry_by_email(
     email: &str,
 ) -> Result<Option<UserEntry>, Box<dyn std::error::Error>> {
-    println!("Fetching user entry for email: {}", email);
+
     let supabase_client = initialize_supabase_client().await;
     match supabase_client
         .select("users")
@@ -25,7 +25,6 @@ pub async fn fetch_user_entry_by_email(
         .await
     {
         Ok(data) => {
-            println!("Data: {:?}", data);
             let user_entry = data.first().map(|user| UserEntry {
                 id: user
                     .get("id")
@@ -64,7 +63,6 @@ pub async fn fetch_user_entry_by_email(
                     .unwrap_or("")
                     .to_string(),
             });
-            println!("User entry: {:?}", user_entry);
             Ok(user_entry)
         }
         Err(e) => Err(e.to_string().into()),
