@@ -1,5 +1,5 @@
 use reqwest::Client;
-use serde::{Deserialize};
+use serde::Deserialize;
 use std::env;
 use std::fs::File;
 use std::io::Read;

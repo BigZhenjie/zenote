@@ -186,7 +186,7 @@ pub async fn sign_in(
 
                 let claims = Claims {
                     sub: email.clone(),
-                    email: email,
+                    email: user_entry.email,
                     user_id: user_entry.id,
                     first_name: user_entry.first_name,
                     last_name: user_entry.last_name,
