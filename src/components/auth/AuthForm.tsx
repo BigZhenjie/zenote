@@ -28,20 +28,18 @@ const AuthForm = () => {
 
     if (email && password) {
       try {
-        console.log("Logging in...");
-        const { status, data, error: loginError } = await login(email, password);
+        const { status, error: loginError } = await login(email, password);
         
         if (loginError) {
           throw { status, error: loginError };
         }
 
-        console.log("Logged in successfully", data);
         navigate("/home");
       } catch (error: any) {
         console.log("Error logging in:", error);
         if (error.status === StatusCode.NotFound) { // User not found
+          setError("Invalid email")
           setShowCreateAccount(true);
-          setShowPasswordField(false);
         } else if (error.status === StatusCode.Unauthorized) { // Invalid password
           setError("Invalid password");
         } else {
