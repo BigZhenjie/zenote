@@ -23,3 +23,11 @@ declare type CustomInputProps = {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
+
+
+//------------------------------------------------Sidebar------------------------------------------
+
+declare type SidebarHeaderProps = {
+  avatarUrl: string | undefined;
+  firstName: string | undefined;
+};
