@@ -1236,6 +1236,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@radix-ui/react-avatar@^1.1.2",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-dialog@2.2",

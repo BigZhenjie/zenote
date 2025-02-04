@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface HoverSidebarProps {
   isHovered: boolean;
 }
@@ -32,7 +33,18 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div>{user?.firstName}</div>
+      <div className="flex gap-2 items-center">
+        <Avatar className="rounded-md w-5 h-5">
+          <AvatarImage
+            src={user?.avatarUrl}
+            alt="Avatar"
+            className="object-cover"
+          />
+          <AvatarFallback>UI</AvatarFallback>
+        </Avatar>
+        <div>{user?.firstName}</div>
+      </div>
+      
     </motion.aside>
   );
 };
