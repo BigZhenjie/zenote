@@ -1,7 +1,5 @@
 const SidebarItem = () => {
-  return (
-    <div>SidebarItem</div>
-  )
-}
+  return <div>SidebarItem</div>;
+};
 
-export default SidebarItem
+export default SidebarItem;

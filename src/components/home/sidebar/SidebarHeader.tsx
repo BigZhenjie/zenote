@@ -1,9 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarHeaderProps } from "@/types";
 
+
+
 const SidebarHeader = ({avatarUrl, firstName}: SidebarHeaderProps) => {
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-2 items-center mb-10">
       <Avatar className="rounded-md w-5 h-5">
         <AvatarImage
           src={avatarUrl}
