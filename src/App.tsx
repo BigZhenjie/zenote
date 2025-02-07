@@ -2,7 +2,7 @@ import "./App.css";
 import { lazy, Suspense } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import LoadingCircle from "./components/LoadingCircle";
-import Home from "./components/home/Home";
+import Home from "./pages/Home";
 import { AuthProvider } from "./context/AuthContext";
 
 // Lazy imports
