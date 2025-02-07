@@ -43,7 +43,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
     >
       <SidebarHeader firstName={user?.firstName} avatarUrl={user?.avatarUrl} />
       {SidebarItems.map((item, index) => (
-        <SidebarItem key={index} text={item} isHovered={isHovered || isHovering} />
+        <p>{item}</p>
       ))}
     </motion.aside>
   );
