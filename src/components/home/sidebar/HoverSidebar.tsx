@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../../context/AuthContext";
 import SidebarHeader from "./SidebarHeader";
-import SidebarItem from "./SidebarItem";
-import { Search, Bot, House  } from "lucide-react";
+import SidebarPrimaryItems from "./SidebarPrimaryItems";
 interface HoverSidebarProps {
   isHovered: boolean;
 }
@@ -14,23 +13,6 @@ const hoverAnimation = (isHovered: boolean) => {
     animate: { x: isHovered ? 0 : -240 },
   };
 };
-
-const SidebarItems = [
-  {
-    title: "Search",
-    icon: Search
-  },
-  {
-    title: "Home",
-    icon: House,
-    path:"/home"
-  },
-  {
-    title: "Chat",
-    icon: Bot,
-    path:"/chat"
-  }
-]
 
 const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
   const [isHovering, setIsHovering] = useState(false);
@@ -46,16 +28,14 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
 
   return (
     <motion.aside
-      className="fixed z-10 rounded-md bg-[#FFFFFF] p-2 px-3 top-14 shadow-md border-slate-300 w-60 h-[500px]"
+      className="fixed z-10 rounded-md bg-[#FFFFFF] p-2 px-2 top-14 shadow-md border-slate-300 w-60 h-[500px] flex flex-col gap-4"
       {...hoverAnimation(isHovered || isHovering)}
       transition={{ duration: 0.15 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <SidebarHeader firstName={user?.firstName} avatarUrl={user?.avatarUrl} />
-      {SidebarItems.map((item, index) => (
-        <SidebarItem key={index} title={item.title} Icon={item.icon} path={item?.path} />
-      ))}
+      <SidebarPrimaryItems />
     </motion.aside>
   );
 };
