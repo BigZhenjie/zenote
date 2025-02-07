@@ -30,7 +30,6 @@ declare type CustomInputProps = {
 //------------------------------------------------Sidebar------------------------------------------
 
 declare type SidebarHeaderProps = {
-  avatarUrl: string | undefined;
   firstName: string | undefined;
 };
 

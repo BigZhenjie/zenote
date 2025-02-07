@@ -34,7 +34,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <SidebarHeader firstName={user?.firstName} avatarUrl={user?.avatarUrl} />
+      <SidebarHeader firstName={user?.firstName}/>
       <SidebarPrimaryItems />
     </motion.aside>
   );
