@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../../../context/AuthContext";
 import SidebarHeader from "./SidebarHeader";
 import SidebarItem from "./SidebarItem";
+import { Search, Bot, House  } from "lucide-react";
 interface HoverSidebarProps {
   isHovered: boolean;
 }
@@ -15,10 +16,20 @@ const hoverAnimation = (isHovered: boolean) => {
 };
 
 const SidebarItems = [
-  "Search",
-  "Home",
-  "Favorites",
-  "Settings",
+  {
+    title: "Search",
+    icon: Search
+  },
+  {
+    title: "Home",
+    icon: House,
+    path:"/home"
+  },
+  {
+    title: "Chat",
+    icon: Bot,
+    path:"/chat"
+  }
 ]
 
 const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
@@ -43,7 +54,7 @@ const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
     >
       <SidebarHeader firstName={user?.firstName} avatarUrl={user?.avatarUrl} />
       {SidebarItems.map((item, index) => (
-        <p>{item}</p>
+        <SidebarItem key={index} title={item.title} Icon={item.icon} path={item?.path} />
       ))}
     </motion.aside>
   );

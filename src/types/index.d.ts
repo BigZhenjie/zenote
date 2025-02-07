@@ -1,4 +1,6 @@
 import { StatusCode } from "../constants/statusCode";
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { LucideProps } from 'lucide-react'; // Adjust this import based on your actual icon library
 //------------------------------------------------RESPONSE------------------------------------------
 export type Response<T = any> = {
   status: StatusCode;
@@ -30,4 +32,10 @@ declare type CustomInputProps = {
 declare type SidebarHeaderProps = {
   avatarUrl: string | undefined;
   firstName: string | undefined;
+};
+
+declare type SidebarItemProps = {
+  title: string;
+  Icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
+  path?: string;
 };

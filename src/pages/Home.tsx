@@ -1,9 +1,9 @@
-import HoverSidebar from "./sidebar/HoverSidebar";
+import HoverSidebar from "@/components/home/sidebar/HoverSidebar";
 import { Menu, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { useState } from "react";
-import { useHover } from "../../hooks/useHover";
+import { useHover } from "@/hooks/useHover";
 import { motion, AnimatePresence } from "motion/react";
-import { iconAnimation } from "../../constants/animation";
+import { iconAnimation } from "@/constants/animation";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
