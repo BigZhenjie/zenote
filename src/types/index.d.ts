@@ -37,4 +37,5 @@ declare type SidebarItemProps = {
   title: string;
   Icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
   path?: string;
+  isActive: boolean;
 };
