@@ -1,9 +1,8 @@
 import HoverSidebar from "@/components/home/sidebar/HoverSidebar";
-import { Menu, ChevronsRight, ChevronsLeft } from "lucide-react";
 import { useState } from "react";
-import { useHover } from "@/hooks/useHover";
-import { motion, AnimatePresence } from "motion/react";
-import { iconAnimation } from "@/constants/animation";
+import { useHover } from "@/hooks/useHover"; // Importing useHover hook
+import { motion } from "motion/react";
+import MenuButton from "@/components/ui/MenuButton";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,40 +13,15 @@ export default function Home() {
     <div className="flex h-screen">
       {/* Sidebar and Menu Button Container */}
       <div className="flex">
-         <HoverSidebar isHovered={isHoverMenu} isCursorOnMenu={isCursorOnMenu} setIsCursorOnMenu={setIsCursorOnMenu} />
-
-        <motion.div
-          ref={menuRef}
-          className="hover:bg-gray-200 cursor-pointer rounded-md p-1 relative h-8 w-8 flex items-center justify-center m-3"
-        >
-          <AnimatePresence>
-            {isMenuOpen ? (
-              <motion.div
-                key="chevLeft"
-                {...iconAnimation}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <ChevronsLeft />
-              </motion.div>
-            ) : isHoverMenu || isCursorOnMenu ? (
-              <motion.div
-                key="chevRight"
-                {...iconAnimation}
-                onClick={() => setIsMenuOpen(true)}
-              >
-                <ChevronsRight />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="menu"
-                {...iconAnimation}
-                onClick={() => setIsMenuOpen(true)}
-              >
-                <Menu />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+        <HoverSidebar isHovered={isHoverMenu} isCursorOnMenu={isCursorOnMenu} setIsCursorOnMenu={setIsCursorOnMenu} />
+        
+        <MenuButton 
+          menuRef={menuRef} 
+          isMenuOpen={isMenuOpen} 
+          setIsMenuOpen={setIsMenuOpen} 
+          isHoverMenu={isHoverMenu} 
+          isCursorOnMenu={isCursorOnMenu} 
+        />
       </div>
 
       <motion.main
@@ -61,3 +35,4 @@ export default function Home() {
     </div>
   );
 }
+
