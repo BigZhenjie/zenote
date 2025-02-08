@@ -7,13 +7,14 @@ import { iconAnimation } from "@/constants/animation";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCursorOnMenu, setIsCursorOnMenu] = useState(false);
   const [menuRef, isHoverMenu] = useHover();
 
   return (
     <div className="flex h-screen">
       {/* Sidebar and Menu Button Container */}
       <div className="flex">
-         <HoverSidebar isHovered={isHoverMenu} />
+         <HoverSidebar isHovered={isHoverMenu} isCursorOnMenu={isCursorOnMenu} setIsCursorOnMenu={setIsCursorOnMenu} />
 
         <motion.div
           ref={menuRef}
@@ -28,7 +29,7 @@ export default function Home() {
               >
                 <ChevronsLeft />
               </motion.div>
-            ) : isHoverMenu ? (
+            ) : isHoverMenu || isCursorOnMenu ? (
               <motion.div
                 key="chevRight"
                 {...iconAnimation}

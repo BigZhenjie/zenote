@@ -5,6 +5,8 @@ import SidebarHeader from "./SidebarHeader";
 import SidebarPrimaryItems from "./SidebarPrimaryItems";
 interface HoverSidebarProps {
   isHovered: boolean;
+  isCursorOnMenu: boolean;
+  setIsCursorOnMenu: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const hoverAnimation = (isHovered: boolean) => {
@@ -14,22 +16,21 @@ const hoverAnimation = (isHovered: boolean) => {
   };
 };
 
-const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered }) => {
-  const [isHovering, setIsHovering] = useState(false);
+const HoverSidebar: React.FC<HoverSidebarProps> = ({ isHovered, isCursorOnMenu, setIsCursorOnMenu}) => {
   const { user } = useAuth();
 
   const handleMouseEnter = () => {
-    setIsHovering(true);
+    setIsCursorOnMenu(true);
   };
 
   const handleMouseLeave = () => {
-    setIsHovering(false);
+    setIsCursorOnMenu(false);
   };
 
   return (
     <motion.aside
       className="fixed z-10 rounded-md bg-[#FFFFFF] p-2 px-2 top-14 shadow-md border-slate-300 w-60 h-[500px] flex flex-col gap-4"
-      {...hoverAnimation(isHovered || isHovering)}
+      {...hoverAnimation(isHovered || isCursorOnMenu)}
       transition={{ duration: 0.15 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

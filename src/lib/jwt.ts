@@ -19,7 +19,7 @@ export function decodeJwt(token: string): JwtPayload | null {
         .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    console.log('Decoded JWT payload:', JSON.parse(jsonPayload));
+
     return JSON.parse(jsonPayload);
   } catch (error) {
     console.error('Failed to decode JWT:', error);
