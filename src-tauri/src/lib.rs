@@ -8,6 +8,9 @@ use crate::supabase::auth::sign_in;
 use crate::supabase::storage::save_temp_file;
 use crate::supabase::storage::upload_file;
 
+
+//pages
+use crate::supabase::pages::fetch_pages;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -32,7 +35,8 @@ pub fn run() {
             check_if_email_exists,
             save_temp_file,
             upload_file,
-            sign_in
+            sign_in,
+            fetch_pages
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
