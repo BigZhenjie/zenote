@@ -39,3 +39,14 @@ declare type SidebarItemProps = {
   path?: string;
   isActive: boolean;
 };
+
+
+//------------------------------------------------Pages------------------------------------------
+declare type PageProps = {
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  id: string;
+  parentPageId: string | null;
+};

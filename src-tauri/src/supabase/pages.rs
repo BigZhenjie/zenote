@@ -38,9 +38,9 @@ pub async fn fetch_pages(
 
     if data.is_empty() {
         return Ok(Response {
-            status: StatusCode::NotFound,
+            status: StatusCode::Ok,
             data: None,
-            error: Some("No pages found for this user".to_string()),
+            error: None,
         });
     }
 
