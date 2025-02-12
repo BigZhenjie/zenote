@@ -15,7 +15,6 @@ export const useUserPages = () => {
       });
       
       const pages = response.data ? response.data : [];
-      console.log("pages", pages);
       setUserPages(pages); // Only setting userPages from the response
     };
     fetchUserPages();

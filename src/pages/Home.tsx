@@ -13,10 +13,10 @@ export default function Home() {
   const [menuRef, isHoverMenu] = useHover();
   const userPages = useUserPages();
   const { user } = useAuth();
-  console.log(user)
+
   return (
     <div className="flex h-screen">
-      {/* 侧边栏容器 */}
+
       <div className="flex">
         <HoverSidebar
           isHovered={isHoverMenu}
@@ -32,7 +32,7 @@ export default function Home() {
         />
       </div>
 
-      {/* 主内容区 */}
+
       <motion.main
         className="w-full p-8 overflow-y-auto flex flex-col rounded-xl ml-4 bg-white"
         initial={{ marginLeft: 0 }}
