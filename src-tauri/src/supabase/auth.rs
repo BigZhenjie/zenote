@@ -55,7 +55,7 @@ pub struct Response<T = serde_json::Value> {
 struct Claims {
     sub: String,
     email: String,
-    user_id: String,
+    user_id: i64,
     first_name: String,
     last_name: String,
     avatar_url: String,
@@ -183,7 +183,8 @@ pub async fn sign_in(
                     .await
                     .map_err(|e| e.to_string())?
                     .ok_or("User not found")?;
-
+                
+                println!("User entry: {:?}", user_entry);
                 let claims = Claims {
                     sub: email.clone(),
                     email: user_entry.email,
