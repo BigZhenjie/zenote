@@ -1,7 +1,7 @@
 import HoverSidebar from "@/components/home/sidebar/HoverSidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useHover } from "@/hooks/useHover"; // Importing useHover hook
-import { motion } from "motion/react";
+import { motion } from "framer-motion"; // Corrected import
 import MenuButton from "@/components/ui/MenuButton";
 import { useAuth } from "@/context/AuthContext";
 import Pages from "@/components/home/page/Pages";
@@ -11,11 +11,23 @@ export default function Home() {
   const [isCursorOnMenu, setIsCursorOnMenu] = useState(false);
   const [menuRef, isHoverMenu] = useHover();
   const { user } = useAuth();
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const currentTime = new Date().getHours();
+    if (currentTime < 12) {
+      setGreeting('Good morning');
+    } else if (currentTime < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
+  }, []);
 
   return (
     <div className="flex h-screen">
 
-      <div className="flex">
+      <div className="absolute flex">
         <HoverSidebar
           isHovered={isHoverMenu}
           isCursorOnMenu={isCursorOnMenu}
@@ -30,17 +42,18 @@ export default function Home() {
         />
       </div>
 
-
       <motion.main
-        className="w-full p-8 overflow-y-auto flex flex-col rounded-xl ml-4 bg-white"
+        className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white"
         initial={{ marginLeft: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <h1 className="text-4xl font-medium mb-8 text-gray-800">
-          Hi, {user?.firstName}!
+        <h1 className="text-3xl font-medium mb-8 text-gray-800 w-full text-center">
+          {greeting}, {user?.firstName} {user?.lastName}
         </h1>
-
-        <Pages />
+        <div className=" max-w-[80%] w-[80%]">
+          <Pages />
+        </div>
+        
       </motion.main>
     </div>
   );
