@@ -15,7 +15,7 @@ pub struct Page {
 
 #[tauri::command]
 pub async fn fetch_pages(
-    user_id: &str,
+    user_id: i64,
 ) -> Result<Response<serde_json::Value>, String> {
     let supabase_client = initialize_supabase_client().await;
     let data = supabase_client
@@ -31,7 +31,7 @@ pub async fn fetch_pages(
             ]
             .to_vec(),
         )
-        .eq("user_id", user_id)
+        .eq("user_id", &user_id.to_string())
         .execute()
         .await
         .map_err(|e| e.to_string())?;
