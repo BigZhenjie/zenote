@@ -17,7 +17,6 @@ pub async fn fetch_user_entry_by_email(
         .await
     {
         Ok(data) => {
-            println!("Data: {:?}", data);
             
             let user_entry = data.first().map(|user| UserEntry {
                 id: user.get("id")

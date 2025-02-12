@@ -184,7 +184,6 @@ pub async fn sign_in(
                     .map_err(|e| e.to_string())?
                     .ok_or("User not found")?;
                 
-                println!("User entry: {:?}", user_entry);
                 let claims = Claims {
                     sub: email.clone(),
                     email: user_entry.email,
