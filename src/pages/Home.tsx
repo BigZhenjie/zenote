@@ -1,15 +1,9 @@
-import HoverSidebar from "@/components/home/sidebar/HoverSidebar";
 import { useState, useEffect } from "react";
-import { useHover } from "@/hooks/useHover"; // Importing useHover hook
 import { motion } from "framer-motion"; // Corrected import
-import MenuButton from "@/components/ui/MenuButton";
 import { useAuth } from "@/context/AuthContext";
 import Pages from "@/components/home/page/Pages";
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCursorOnMenu, setIsCursorOnMenu] = useState(false);
-  const [menuRef, isHoverMenu] = useHover();
   const { user } = useAuth();
   const [greeting, setGreeting] = useState('');
 
