@@ -4,7 +4,9 @@ const SidebarItem = ({ title, Icon, path, isActive }: SidebarItemProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(path);
+    if (path) {
+      navigate(path);
+    }
   };
   return (
     <div>

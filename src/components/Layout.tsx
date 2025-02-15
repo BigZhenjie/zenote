@@ -25,9 +25,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           isCursorOnMenu={isCursorOnMenu}
         />
       </div>
-      <div className="flex-grow p-8">
         {children}
-      </div>
     </div>
   );
 };

@@ -25,23 +25,6 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex h-screen">
-
-      <div className="absolute flex">
-        <HoverSidebar
-          isHovered={isHoverMenu}
-          isCursorOnMenu={isCursorOnMenu}
-          setIsCursorOnMenu={setIsCursorOnMenu}
-        />
-        <MenuButton
-          menuRef={menuRef}
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          isHoverMenu={isHoverMenu}
-          isCursorOnMenu={isCursorOnMenu}
-        />
-      </div>
-
       <motion.main
         className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white"
         initial={{ marginLeft: 0 }}
@@ -55,6 +38,5 @@ export default function Home() {
         </div>
         
       </motion.main>
-    </div>
   );
 }
