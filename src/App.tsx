@@ -4,7 +4,8 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 import LoadingCircle from "./components/LoadingCircle";
 import Home from "./pages/Home";
 import { AuthProvider } from "./context/AuthContext";
-
+import Layout from "./components/Layout"; // Importing Layout component
+import Page from "./pages/Page";
 // Lazy imports
 const Login = lazy(() => import("./pages/Login"));
 const OnBoarding = lazy(() => import("./pages/OnBoarding"));
@@ -19,13 +20,16 @@ function App() {
             </div>
           }
         >
-          <Routes>
+          <Layout>
+            <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/onboarding/:email" element={<OnBoarding />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/:pageId" element={<Page />} />
             {/*route for 404*/}
             <Route path="*" element={<div>404</div>} />
-          </Routes>
+            </Routes>
+          </Layout>
         </Suspense>
       </HashRouter>
     </AuthProvider>
