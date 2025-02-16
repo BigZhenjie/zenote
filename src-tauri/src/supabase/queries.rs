@@ -20,14 +20,8 @@ pub async fn fetch_user_entry_by_email(
             
             let user_entry = data.first().map(|user| UserEntry {
                 id: user.get("id")
-                    .and_then(|v| v.as_i64())
-                    .unwrap_or_else(|| {
-                        user.get("id")
-                            .and_then(|v| v.as_u64())
-                            .filter(|&v| v <= i64::MAX as u64)
-                            .map(|v| v as i64)
-                            .unwrap_or(0)
-                    }),
+                    .and_then(|v| v.as_str().map(String::from).or_else(|| v.as_i64().map(|n| n.to_string())))
+                    .unwrap_or_default(),
                 email: user.get("email")
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
@@ -58,7 +52,7 @@ pub async fn fetch_user_entry_by_email(
 
 #[derive(Debug, Deserialize)]
 pub struct UserEntry {
-    pub id: i64,
+    pub id: String,
     pub email: String,
     pub first_name: String,
     pub last_name: String,

@@ -3,22 +3,25 @@ import { useParams } from "react-router-dom";
 import { usePage } from "@/hooks/usePage"
 import { PageProps } from "@/types"
 import { invoke } from "@tauri-apps/api/core";
-
+import { useAuth } from "@/context/AuthContext";
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!)
   const [title, setTitle] = useState("");
+  const {user} = useAuth();
 
   // Auto-save every 10 seconds
   useEffect(() => {
     if (!pageId) return;
 
     const interval = setInterval(async () => {
+      console.log("pageId: ", pageId);
       try {
         await invoke("update_page", {
-          pageId,
-          title,
-          parent_page_id: pageData?.parentPageId || null
+          pageId: pageId,
+userId: String(user?.id),
+          title: title,
+          parentPageId: pageData?.parentPageId || null
         });
         console.log("Page auto-saved");
       } catch (error) {

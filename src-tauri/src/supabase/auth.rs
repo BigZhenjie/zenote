@@ -55,7 +55,7 @@ pub struct Response<T = serde_json::Value> {
 struct Claims {
     sub: String,
     email: String,
-    user_id: i64,
+    user_id: String,
     first_name: String,
     last_name: String,
     avatar_url: String,
@@ -187,7 +187,7 @@ pub async fn sign_in(
                 let claims = Claims {
                     sub: email.clone(),
                     email: user_entry.email,
-                    user_id: user_entry.id,
+                    user_id: user_entry.id.to_string(),
                     first_name: user_entry.first_name,
                     last_name: user_entry.last_name,
                     avatar_url: user_entry.avatar_url,
