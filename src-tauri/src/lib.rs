@@ -11,6 +11,8 @@ use crate::supabase::storage::upload_file;
 
 //pages
 use crate::supabase::pages::fetch_pages;
+use crate::supabase::pages::fetch_page;
+use crate::supabase::pages::update_page;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -36,7 +38,9 @@ pub fn run() {
             save_temp_file,
             upload_file,
             sign_in,
-            fetch_pages
+            fetch_pages,
+            fetch_page,
+            update_page,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

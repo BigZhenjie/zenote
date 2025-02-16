@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import HoverSidebar from './home/sidebar/HoverSidebar'; // Placeholder import
 import MenuButton from './ui/MenuButton'; // Placeholder import
-import { useAuth } from '../context/AuthContext'; // Placeholder import
 import { useHover } from '../hooks/useHover'; // Placeholder import
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
