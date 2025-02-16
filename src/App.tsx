@@ -24,8 +24,8 @@ function App() {
         >
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/onboarding/:email" element={<OnBoarding />} />
             <Route element={<Layout children={<Outlet />} />}>
-              <Route path="/onboarding/:email" element={<OnBoarding />} />
               <Route path="/home" element={<Home />} />
               <Route path="/:pageId" element={<Page />} />
               {/*route for 404*/}
