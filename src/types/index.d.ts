@@ -26,6 +26,16 @@ declare type CustomInputProps = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
+declare type User = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  createdAt: string;
+  id: string;
+  token: string;
+};
+
 
 //------------------------------------------------Sidebar------------------------------------------
 

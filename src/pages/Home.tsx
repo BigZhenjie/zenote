@@ -28,7 +28,7 @@ export default function Home() {
           {greeting}, {user?.firstName} {user?.lastName}
         </h1>
         <div className=" max-w-[80%] w-[80%]">
-          <Pages />
+          <Pages user={user!} />
         </div>
         
       </motion.main>

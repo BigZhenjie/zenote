@@ -9,16 +9,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { decodeJwt, isTokenExpired } from "../lib/jwt";
 import { Response } from "../types";
 import { StatusCode } from "../constants/statusCode";
-
-type User = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
-  createdAt: string;
-  id: string;
-  token: string;
-};
+import { User } from "../types";
 
 
 type AuthContextType = {

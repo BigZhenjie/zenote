@@ -2,7 +2,8 @@ import PageSquare from "./PageSquare";
 import { useUserPages } from "@/hooks/userPages";
 import NewPageButton from "./NewPageButton";
 import { Clock3 } from "lucide-react";
-const Pages = () => {
+import { User } from "@/types";
+const Pages = ({user}: {user: User}) => {
   const userPages = useUserPages();
   return (
     <>
@@ -12,7 +13,7 @@ const Pages = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
         {userPages.map((page) => (
-          <PageSquare key={page.id} {...page} />
+          <PageSquare key={page.id} {...page} profilePicUrl={user.avatarUrl} />
         ))}
         <NewPageButton />
       </div>
