@@ -1,9 +1,9 @@
 use crate::supabase::responses::{Response, StatusCode}; // Import Response and StatusCode
 use crate::supabase::supabase::initialize_supabase_client;
+use dotenv::dotenv;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value}; // Import Value and json macro for JSON handling
-use reqwest::Client;
-use dotenv::dotenv;
 use std::env;
 
 #[derive(Debug, Deserialize, Serialize)] // Add Serialize here
@@ -33,7 +33,7 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
             error: None,
         });
     }
-
+    println!("data: {:?}", data);
     let pages: Vec<Page> = data
         .iter()
         .map(|page| Page {
@@ -57,10 +57,17 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
                 .to_string(),
             user_id: page
                 .get("user_id")
-                .unwrap_or(&Value::Null)
-                .as_str()
-                .unwrap_or("")
-                .to_string(),
+                .and_then(|v| {
+                    // Handle both string and numeric types from database
+                    if v.is_string() {
+                        v.as_str().map(|s| s.to_string())
+                    } else {
+                        v.as_f64()
+                            .map(|n| n.to_string())
+                            .or_else(|| v.as_i64().map(|n| n.to_string()))
+                    }
+                })
+                .unwrap_or_default(),
             title: page
                 .get("title")
                 .unwrap_or(&Value::Null)
@@ -225,13 +232,12 @@ pub async fn create_page(
     title: String,
     parent_page_id: Option<String>,
 ) -> Result<Response<serde_json::Value>, String> {
-
     dotenv().ok();
-    
-    let supabase_url = env::var("SUPABASE_URL")
-        .map_err(|_| "Missing SUPABASE_URL in .env".to_string())?;
-    let supabase_key = env::var("SUPABASE_API_KEY")
-        .map_err(|_| "Missing SUPABASE_KEY in .env".to_string())?;
+
+    let supabase_url =
+        env::var("SUPABASE_URL").map_err(|_| "Missing SUPABASE_URL in .env".to_string())?;
+    let supabase_key =
+        env::var("SUPABASE_API_KEY").map_err(|_| "Missing SUPABASE_KEY in .env".to_string())?;
 
     let client = Client::new();
     let mut payload = serde_json::json!({
