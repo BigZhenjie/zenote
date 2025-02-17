@@ -21,17 +21,6 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
     let supabase_client = initialize_supabase_client().await;
     let data = supabase_client
         .select("pages")
-        .columns(
-            [
-                "id",
-                "created_at",
-                "updated_at",
-                "user_id",
-                "title",
-                "parent_page_id",
-            ]
-            .to_vec(),
-        )
         .eq("user_id", &user_id)
         .execute()
         .await
@@ -195,7 +184,7 @@ pub async fn update_page(
 ) -> Result<Response<serde_json::Value>, String> {
     let page_exists = page_exists(page_id.clone()).await;
     println!("page exists: {}", page_exists);
-    if (!page_exists) {
+    if !page_exists {
         if let Err(e) = create_page(user_id, page_id, title, parent_page_id).await {
             return Ok(Response {
                 status: StatusCode::Ok,
@@ -229,52 +218,6 @@ pub async fn update_page(
         error: None,
     })
 }
-
-
-// pub async fn create_page(
-//     user_id: String,
-//     page_id: String,
-//     title: String,
-//     parent_page_id: Option<String>,
-// ) -> Result<Response<serde_json::Value>, String> {
-//     let supabase_client = initialize_supabase_client().await;
-
-
-//     let body = json!({
-//         "user_id": user_id.parse::<i64>().unwrap(),
-//         "title": title,
-//         "id": page_id, // Use the string representation
-//         "parent_page_id": parent_page_id,
-//         "created_at": chrono::Utc::now().to_rfc3339(),
-//         "updated_at": chrono::Utc::now().to_rfc3339(),
-//     });
-
-//     println!("body: {:?}", body);
-
-//     match supabase_client.insert("pages", body).await {
-//         Ok(response) => {
-//             println!("data from creating page: {:?}", response);
-
-//             if response.is_empty() {
-//                 return Ok(Response {
-//                     status: StatusCode::Ok,
-//                     data: None,
-//                     error: None,
-//                 });
-//             }
-
-//             Ok(Response {
-//                 status: StatusCode::Ok,
-//                 data: Some(serde_json::json!("Created page")),
-//                 error: None,
-//             })
-//         }
-//         Err(e) => {
-//             println!("Error inserting page: {:?}", e);
-//             Err(e.to_string())
-//         }
-//     }
-// }
 
 pub async fn create_page(
     user_id: String,

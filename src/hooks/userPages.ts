@@ -6,19 +6,26 @@ import { useAuth } from "@/context/AuthContext";
 export const useUserPages = () => {
   const { user } = useAuth();
   const [userPages, setUserPages] = useState<[] | PageProps[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserPages = async () => {
-      if (!user) return;
+      setIsLoading(true);
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
       const response: Response = await invoke("fetch_pages", {
-        userId: user.id
+        userId: user.id,
       });
-      
+
       const pages = response.data ? response.data : [];
       setUserPages(pages); // Only setting userPages from the response
+      console.log("User pages:", pages);
+      setIsLoading(false);
     };
     fetchUserPages();
-  }, []);
+  }, [user]);
 
-  return userPages;
+  return {userPages, isLoading};
 };

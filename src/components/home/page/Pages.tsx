@@ -3,12 +3,20 @@ import { useUserPages } from "@/hooks/userPages";
 import NewPageButton from "./NewPageButton";
 import { Clock3 } from "lucide-react";
 import { User } from "@/types";
-const Pages = ({user}: {user: User}) => {
-  const userPages = useUserPages();
+import LoadingCircle from "@/components/LoadingCircle";
+const Pages = ({ user }: { user: User }) => {
+  const {userPages, isLoading} = useUserPages(); // No need for isLoading anymore
+
+  if (isLoading) {
+    return <div className="w-full">
+      <LoadingCircle />
+    </div>;
+  }
+
   return (
     <>
       <div className="flex gap-1 items-center mb-4">
-        <Clock3 className=" opacity-45" size={13}/>
+        <Clock3 className="opacity-45" size={13} />
         <p className="text-xs font-semibold opacity-55">Recently Viewed</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
