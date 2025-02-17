@@ -49,4 +49,5 @@ declare type PageProps = {
   userId: string;
   id: string;
   parentPageId: string | null;
+  profilePicUrl: string;
 };
