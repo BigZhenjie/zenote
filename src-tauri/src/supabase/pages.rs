@@ -2,6 +2,9 @@ use crate::supabase::responses::{Response, StatusCode}; // Import Response and S
 use crate::supabase::supabase::initialize_supabase_client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value}; // Import Value and json macro for JSON handling
+use reqwest::Client;
+use dotenv::dotenv;
+use std::env;
 
 #[derive(Debug, Deserialize, Serialize)] // Add Serialize here
 pub struct Page {
@@ -220,59 +223,106 @@ pub async fn update_page(
         .map_err(|e| e.to_string())?;
     println!("data from updating page: {:?}", data);
 
-    // let page = Page {
-    //     id: data[0].get("id").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
-    //     created_at: data[0].get("created_at").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
-    //     updated_at: data[0].get("updated_at").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
-    //     user_id: data[0].get("user_id").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
-    //     title: data[0].get("title").unwrap_or(&Value::Null).as_str().unwrap_or("").to_string(),
-    //     parent_page_id: data[0].get("parent_page_id").map(|v| v.as_str().unwrap_or("").to_string()),
-    // };
-
     Ok(Response {
         status: StatusCode::Ok,
         data: None,
         error: None,
     })
 }
+
+
+// pub async fn create_page(
+//     user_id: String,
+//     page_id: String,
+//     title: String,
+//     parent_page_id: Option<String>,
+// ) -> Result<Response<serde_json::Value>, String> {
+//     let supabase_client = initialize_supabase_client().await;
+
+
+//     let body = json!({
+//         "user_id": user_id.parse::<i64>().unwrap(),
+//         "title": title,
+//         "id": page_id, // Use the string representation
+//         "parent_page_id": parent_page_id,
+//         "created_at": chrono::Utc::now().to_rfc3339(),
+//         "updated_at": chrono::Utc::now().to_rfc3339(),
+//     });
+
+//     println!("body: {:?}", body);
+
+//     match supabase_client.insert("pages", body).await {
+//         Ok(response) => {
+//             println!("data from creating page: {:?}", response);
+
+//             if response.is_empty() {
+//                 return Ok(Response {
+//                     status: StatusCode::Ok,
+//                     data: None,
+//                     error: None,
+//                 });
+//             }
+
+//             Ok(Response {
+//                 status: StatusCode::Ok,
+//                 data: Some(serde_json::json!("Created page")),
+//                 error: None,
+//             })
+//         }
+//         Err(e) => {
+//             println!("Error inserting page: {:?}", e);
+//             Err(e.to_string())
+//         }
+//     }
+// }
+
 pub async fn create_page(
     user_id: String,
     page_id: String,
     title: String,
     parent_page_id: Option<String>,
 ) -> Result<Response<serde_json::Value>, String> {
-    let supabase_client = initialize_supabase_client().await;
-    let body = json!({
-        "user_id": user_id.parse::<i64>().unwrap(),
-        "title": title,
+
+    dotenv().ok();
+    
+    let supabase_url = env::var("SUPABASE_URL")
+        .map_err(|_| "Missing SUPABASE_URL in .env".to_string())?;
+    let supabase_key = env::var("SUPABASE_API_KEY")
+        .map_err(|_| "Missing SUPABASE_KEY in .env".to_string())?;
+
+    let client = Client::new();
+    let mut payload = serde_json::json!({
+        "user_id": user_id,
         "id": page_id,
-        "parent_page_id": parent_page_id,
-        "created_at": chrono::Utc::now().to_rfc3339().to_string(),
-        "updated_at": chrono::Utc::now().to_rfc3339().to_string(),
+        "title": title,
+        "created_at": chrono::Utc::now().to_rfc3339(),
+        "updated_at": chrono::Utc::now().to_rfc3339(),
     });
 
-    match supabase_client.insert("pages", body).await {
-        Ok(response) => {
-            println!("data from creating page: {:?}", response);
-
-            if response.is_empty() {
-                return Ok(Response {
-                    status: StatusCode::Ok,
-                    data: None,
-                    error: None,
-                });
-            }
-
-            Ok(Response {
-                status: StatusCode::Ok,
-                data: Some(serde_json::json!("Created page")),
-                error: None,
-            })
-        }
-        Err(e) => {
-            println!("Error inserting page: {:?}", e);
-            // Convert the error to string and return
-            Err(e.to_string())
-        }
+    if let Some(parent_id) = parent_page_id {
+        payload["parent_page_id"] = serde_json::Value::String(parent_id);
     }
+
+    let response = client
+        .post(&format!("{}/rest/v1/pages", supabase_url))
+        .header("apikey", &supabase_key)
+        .header("Authorization", format!("Bearer {}", supabase_key))
+        .header("Content-Type", "application/json")
+        .header("Prefer", "return=representation")
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let status = if response.status().is_success() {
+        StatusCode::Ok
+    } else {
+        StatusCode::BadRequest
+    };
+
+    Ok(Response {
+        status,
+        data: Some(response.json().await.map_err(|e| e.to_string())?),
+        error: None,
+    })
 }
