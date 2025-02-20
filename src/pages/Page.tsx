@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePage } from "@/hooks/usePage";
-import { PageProps } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/context/AuthContext";
 const Page = () => {
@@ -21,7 +20,7 @@ const Page = () => {
           pageId: pageId,
           userId: String(user?.id),
           title: title,
-          parentPageId: pageData?.parentPageId || null,
+          parentPageId: pageData?.parent_page_id,
         });
         console.log("Page auto-saved");
       } catch (error) {
@@ -30,7 +29,7 @@ const Page = () => {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [pageId, title, pageData?.parentPageId]);
+  }, [pageId, title, pageData?.parent_page_id]);
 
   return (
     <div className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white">
