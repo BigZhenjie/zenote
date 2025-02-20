@@ -54,10 +54,10 @@ declare type SidebarItemProps = {
 //------------------------------------------------Pages------------------------------------------
 declare type PageProps = {
   title: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
   id: string;
-  parentPageId: string | null;
+  parent_page_id: string;
   profilePicUrl: string;
 };

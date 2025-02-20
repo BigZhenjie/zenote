@@ -5,10 +5,10 @@ import { FileText } from "lucide-react";
 const PageSquare = ({
   id,
   title,
-  createdAt,
-  updatedAt,
-  userId,
-  parentPageId,
+  created_at,
+  updated_at,
+  user_id,
+  parent_page_id,
   profilePicUrl,
 }: PageProps) => {
   const navigate = useNavigate();
@@ -19,7 +19,8 @@ const PageSquare = ({
 
   const formatTimeSinceUpdate = () => {
     const now = new Date();
-    const updated = new Date(updatedAt);
+    const updated = new Date(updated_at);
+    console.log(now, updated);
     const diffInMinutes = Math.floor((now.getTime() - updated.getTime()) / 60000);
 
     if (diffInMinutes < 1) {
