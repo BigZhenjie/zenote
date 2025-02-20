@@ -24,6 +24,7 @@ const Pages = ({ user }: { user: User }) => {
           <PageSquare key={page.id} {...page} profilePicUrl={user.avatarUrl} />
         ))}
         <NewPageButton />
+        
       </div>
     </>
   );

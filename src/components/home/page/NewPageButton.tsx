@@ -12,7 +12,7 @@ const NewPageButton = () => {
 
   return (
     <button 
-      className="relative w-36 h-36 rounded-2xl border-[1px] hover:border-gray-300 hover:shadow-md"
+      className="relative min-w-36 min-h-36 rounded-2xl border-[1px] hover:border-gray-300 hover:shadow-md"
       onClick={handleCreatePage}
     >
       <div className="absolute top-0 left-0 right-0 h-[30%] bg-ze-light rounded-t-2xl"/>

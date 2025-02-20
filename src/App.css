@@ -64,12 +64,16 @@
   }
 
 
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
-}
+  html::-webkit-scrollbar {
+    width: 30px;
+  }
+   
+  html::-webkit-scrollbar-track {
+    background: black;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  }
+   
+  html::-webkit-scrollbar-thumb {
+    background: red;
+    border: 3px solid blue;
+  }
