@@ -4,11 +4,13 @@ import { usePage } from "@/hooks/usePage";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/context/AuthContext";
 import { Response } from "@/types";
+import LoadingCircle from "@/components/LoadingCircle";
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!);
   const [title, setTitle] = useState("");
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-save every 10 seconds
   useEffect(() => {
@@ -35,16 +37,29 @@ const Page = () => {
   // Fetch page data on mount
   useEffect(() => {
     if (!pageId) return;
+
     const fetchPageData = async () => {
+      setIsLoading(true);
       const response: Response = await invoke("fetch_page", {
         pageId: pageId,
       });
-      if (!response.data ) return
+      if (!response.data ){
+        setIsLoading(false);
+        return;
+      }
 
       setTitle(response.data.title);
+      setIsLoading(false);
     };
     fetchPageData();
   }, [pageId]);
+
+
+  if (isLoading) {
+    return <div className="w-full">
+      <LoadingCircle />
+    </div>;
+  }
 
   return (
     <div className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white">
