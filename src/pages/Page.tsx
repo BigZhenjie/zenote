@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { usePage } from "@/hooks/usePage";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/context/AuthContext";
-import { PageProps, Response } from "@/types";
+import { Response } from "@/types";
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!);
@@ -53,6 +53,7 @@ const Page = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="New page"
+          spellCheck="false"
           className="mt-20 text-4xl p-2 outline-none font-bold placeholder:font-bold placeholder:opacity-40"
         ></input>
       </div>
