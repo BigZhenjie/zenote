@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { usePage } from "@/hooks/usePage";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/context/AuthContext";
+import { PageProps, Response } from "@/types";
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!);
@@ -30,6 +31,20 @@ const Page = () => {
 
     return () => clearInterval(interval);
   }, [pageId, title, pageData?.parent_page_id]);
+
+  // Fetch page data on mount
+  useEffect(() => {
+    if (!pageId) return;
+    const fetchPageData = async () => {
+      const response: Response = await invoke("fetch_page", {
+        pageId: pageId,
+      });
+      if (!response.data ) return
+
+      setTitle(response.data.title);
+    };
+    fetchPageData();
+  }, [pageId]);
 
   return (
     <div className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white">
