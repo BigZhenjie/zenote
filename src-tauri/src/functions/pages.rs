@@ -1,7 +1,7 @@
-use crate::supabase::responses::{Response, StatusCode}; // Import Response and StatusCode
-use crate::supabase::supabase::initialize_supabase_client;
+use crate::functions::responses::{Response, StatusCode}; // Import Response and StatusCode
+use crate::functions::supabase::initialize_supabase_client;
 use dotenv::dotenv;
-use reqwest::Client;
+use reqwest::{Client, Response as ReqwestResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value}; // Import Value and json macro for JSON handling
 use std::env;
@@ -33,7 +33,6 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
             error: None,
         });
     }
-    println!("data: {:?}", data);
     let pages: Vec<Page> = data
         .iter()
         .map(|page| Page {
@@ -190,7 +189,6 @@ pub async fn update_page(
     parent_page_id: Option<String>,
 ) -> Result<Response<serde_json::Value>, String> {
     let page_exists = page_exists(page_id.clone()).await;
-    println!("page exists: {}", page_exists);
     if !page_exists {
         if let Err(e) = create_page(user_id, page_id, title, parent_page_id).await {
             return Ok(Response {
@@ -213,6 +211,8 @@ pub async fn update_page(
         "parent_page_id": parent_page_id,
         "updated_at": chrono::Utc::now().to_rfc3339(),
     });
+    println!("page_id: {:?}", page_id);
+    println!("body: {:?}", body);
     let data = supabase_client
         .update("pages", &page_id, body)
         .await
@@ -274,4 +274,38 @@ pub async fn create_page(
         data: Some(response.json().await.map_err(|e| e.to_string())?),
         error: None,
     })
+}
+
+pub async fn update_with_column_name(
+    client: &SupabaseClient,
+    table_name: &str,
+    column_name: &str,
+    id: &str,
+    body: Value,
+) -> Result<String, String> {
+    let endpoint: String = format!(
+        "{}/rest/v1/{}?{}=eq.{}",
+        client.url, table_name, column_name, id
+    );
+
+    let response: Response = match client
+        .client
+        .patch(&endpoint)
+        .header("apikey", &client.api_key)
+        .header("Authorization", &format!("Bearer {}", &client.api_key))
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&body).map_err(|e| e.to_string())?)
+        .send()
+        .await
+    {
+        Ok(response) => response,
+        Err(error) => return Err(error.to_string()),
+    };
+
+    if response.status().is_success() {
+        Ok(id.to_string())
+    } else {
+        let error_body = response.text().await.unwrap_or_default();
+        Err(format!("Error {}: {}", response.status(), error_body))
+    }
 }

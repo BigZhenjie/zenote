@@ -1,4 +1,4 @@
-use crate::supabase::supabase::initialize_supabase_client;
+use crate::functions::supabase::initialize_supabase_client;
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
@@ -8,7 +8,7 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{de::Deserializer, ser::Serializer, Deserialize, Serialize};
 use serde_json::json;
 
-use crate::supabase::queries::fetch_user_entry_by_email;
+use crate::functions::queries::fetch_user_entry_by_email;
 #[derive(Debug, Copy, Clone)]
 pub enum StatusCode {
     Ok = 200,
@@ -120,7 +120,6 @@ pub async fn sign_up(
 ) -> Result<Response<String>, String> {
     let supabase_client = initialize_supabase_client().await;
 
-    println!("Attempting to create user with email: {}", email);
 
     let response = supabase_client
         .insert(

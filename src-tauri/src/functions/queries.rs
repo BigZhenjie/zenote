@@ -1,6 +1,5 @@
-use crate::supabase::supabase::initialize_supabase_client;
+use crate::functions::supabase::initialize_supabase_client;
 use serde::Deserialize;
-use serde_json::Value; // Ensure this import is correct
 
 pub async fn fetch_user_entry_by_email(
     email: &str,
