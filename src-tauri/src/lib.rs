@@ -1,4 +1,7 @@
-mod functions; // Include the pages module publicly
+mod functions;
+mod supabase;
+
+pub use supabase::update::update;
 //auth
 use crate::functions::auth::check_if_email_exists;
 use crate::functions::auth::sign_up;

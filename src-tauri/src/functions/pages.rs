@@ -5,7 +5,7 @@ use reqwest::{Client};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value}; // Import Value and json macro for JSON handling
 use std::env;
-
+use crate::supabase::update::update;
 
 #[derive(Debug, Deserialize, Serialize)] // Add Serialize here
 pub struct Page {
@@ -205,20 +205,43 @@ pub async fn update_page(
         });
     }
 
-    let supabase_client = initialize_supabase_client().await;
+    dotenv().ok();
+    let supabase_url = env::var("SUPABASE_URL").map_err(|e| e.to_string())?;
+    let supabase_key = env::var("SUPABASE_API_KEY").map_err(|e| e.to_string())?;
 
+    // let body = serde_json::json!({
+    //     "id": page_id,
+    //     "title": title,
+    //     "parent_page_id": parent_page_id,
+    //     "updated_at": chrono::Utc::now().to_rfc3339(),
+    // });
     let body = serde_json::json!({
+        "id": page_id,
         "title": title,
-        "parent_page_id": parent_page_id,
+        "parent_page_id": if let Some(ref id) = parent_page_id {
+            if id.is_empty() {
+                serde_json::Value::Null
+            } else {
+                serde_json::Value::String(id.clone())
+            }
+        } else {
+            serde_json::Value::Null
+        },
         "updated_at": chrono::Utc::now().to_rfc3339(),
+        "user_id": user_id,
     });
-    println!("page_id: {:?}", page_id);
-    println!("body: {:?}", body);
-    let data = supabase_client
-        .update("pages", &page_id, body)
-        .await
-        .map_err(|e| e.to_string())?;
-    println!("data from updating page: {:?}", data);
+    
+    println!("Body: {:?}", body);
+    let result = update(
+        &supabase_url,
+        &supabase_key,
+        "pages",
+        "id",
+        &page_id,
+        body
+    ).await?;
+    
+    println!("Update result: {:?}", result);
 
     Ok(Response {
         status: StatusCode::Ok,
@@ -276,4 +299,3 @@ pub async fn create_page(
         error: None,
     })
 }
-
