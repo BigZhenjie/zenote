@@ -1,10 +1,11 @@
 use crate::functions::responses::{Response, StatusCode}; // Import Response and StatusCode
 use crate::functions::supabase::initialize_supabase_client;
 use dotenv::dotenv;
-use reqwest::{Client, Response as ReqwestResponse};
+use reqwest::{Client};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value}; // Import Value and json macro for JSON handling
+use serde_json::{Value}; // Import Value and json macro for JSON handling
 use std::env;
+
 
 #[derive(Debug, Deserialize, Serialize)] // Add Serialize here
 pub struct Page {
@@ -276,36 +277,3 @@ pub async fn create_page(
     })
 }
 
-pub async fn update_with_column_name(
-    client: &SupabaseClient,
-    table_name: &str,
-    column_name: &str,
-    id: &str,
-    body: Value,
-) -> Result<String, String> {
-    let endpoint: String = format!(
-        "{}/rest/v1/{}?{}=eq.{}",
-        client.url, table_name, column_name, id
-    );
-
-    let response: Response = match client
-        .client
-        .patch(&endpoint)
-        .header("apikey", &client.api_key)
-        .header("Authorization", &format!("Bearer {}", &client.api_key))
-        .header("Content-Type", "application/json")
-        .body(serde_json::to_string(&body).map_err(|e| e.to_string())?)
-        .send()
-        .await
-    {
-        Ok(response) => response,
-        Err(error) => return Err(error.to_string()),
-    };
-
-    if response.status().is_success() {
-        Ok(id.to_string())
-    } else {
-        let error_body = response.text().await.unwrap_or_default();
-        Err(format!("Error {}: {}", response.status(), error_body))
-    }
-}
