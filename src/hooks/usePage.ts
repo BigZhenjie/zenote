@@ -14,7 +14,6 @@ export function usePage(pageId: string) {
         const response: Response = await invoke("fetch_page", { pageId });
         if (isMounted) {
           if (response.status === 200) {
-            console.log("Data fetched: ", response.data);
             setData(response.data ? response.data : {});
             
           } else {

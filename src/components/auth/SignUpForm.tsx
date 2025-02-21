@@ -75,7 +75,6 @@ const SignUpForm = () => {
         avatarUrl
       });
       
-      console.log("Sign up response:", sign_up_response);
     } catch (error) {
       console.error("Sign up failed:", error);
     } finally {

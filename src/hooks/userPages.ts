@@ -21,7 +21,6 @@ export const useUserPages = () => {
 
       const pages = response.data ? response.data : [];
       setUserPages(pages); // Only setting userPages from the response
-      console.log("User pages:", pages);
       setIsLoading(false);
     };
     fetchUserPages();

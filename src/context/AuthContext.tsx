@@ -59,11 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             password,
           }
         );
-      console.log("Login response:", response);
       if (response.status === StatusCode.Ok && response.data?.token) {
         sessionStorage.setItem("authToken", response.data.token);
         const payload = decodeJwt(response.data.token);
-        console.log("payload:", payload);
         if (payload) {
           setUser({
             email: payload.email,

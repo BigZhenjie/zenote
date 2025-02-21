@@ -17,7 +17,6 @@ const Page = () => {
     if (!pageId) return;
 
     const interval = setInterval(async () => {
-      console.log("pageId: ", pageId);
       try {
         await invoke("update_page", {
           pageId: pageId,
@@ -25,7 +24,6 @@ const Page = () => {
           title: title,
           parentPageId: pageData?.parent_page_id,
         });
-        console.log("Page auto-saved");
       } catch (error) {
         console.error("Failed to auto-save page:", error);
       }

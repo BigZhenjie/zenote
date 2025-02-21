@@ -20,7 +20,6 @@ const PageSquare = ({
   const formatTimeSinceUpdate = () => {
     const now = new Date();
     const updated = new Date(updated_at);
-    console.log(now, updated);
     const diffInMinutes = Math.floor((now.getTime() - updated.getTime()) / 60000);
 
     if (diffInMinutes < 1) {

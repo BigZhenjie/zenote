@@ -36,7 +36,6 @@ const AuthForm = () => {
 
         navigate("/home");
       } catch (error: any) {
-        console.log("Error logging in:", error);
         if (error.status === StatusCode.NotFound) { // User not found
           setError("Invalid email")
           setShowCreateAccount(true);
