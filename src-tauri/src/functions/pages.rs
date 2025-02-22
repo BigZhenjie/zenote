@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value}; // Import Value and json macro for JSON handling
 use std::env;
 use crate::supabase::update::update;
+use chrono::DateTime;
 
 #[derive(Debug, Deserialize, Serialize)] // Add Serialize here
 pub struct Page {
@@ -34,7 +35,7 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
             error: None,
         });
     }
-    let pages: Vec<Page> = data
+    let mut pages: Vec<Page> = data
         .iter()
         .map(|page| Page {
             id: page
@@ -79,7 +80,51 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
                 .map(|v| v.as_str().unwrap_or("").to_string()),
         })
         .collect();
+        println!("\n=== Pages Before Sorting ===");
+        for page in &pages {
+            println!(
+                "ID: {}, Title: '{}', Updated: {}, Parent: {:?}",
+                page.id,
+                page.title,
+                page.updated_at,
+                page.parent_page_id
+            );
+        }
+        
+    pages.sort_by(|a, b| {
+        // Parse timestamp, adding UTC timezone if missing
+        let parse_date = |ts: &str| {
+            if ts.ends_with('Z') {
+                DateTime::parse_from_rfc3339(ts)
+            } else {
+                // If no timezone, assume UTC and append Z
+                DateTime::parse_from_rfc3339(&format!("{}Z", ts))
+                    .or_else(|_| DateTime::parse_from_str(ts, "%Y-%m-%dT%H:%M:%S%.f"))
+            }
+        };
 
+        let a_date = parse_date(&a.updated_at).unwrap_or_else(|e| {
+            println!("Error parsing date for page {}: {}", a.id, e);
+            DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z").unwrap()
+        });
+            
+        let b_date = parse_date(&b.updated_at).unwrap_or_else(|e| {
+            println!("Error parsing date for page {}: {}", b.id, e);
+            DateTime::parse_from_rfc3339("1970-01-01T00:00:00Z").unwrap()
+        });
+        b_date.cmp(&a_date)
+    });
+    
+    println!("\n=== Pages After Sorting ===");
+    for page in &pages {
+        println!(
+            "ID: {}, Title: '{}', Updated: {}, Parent: {:?}",
+            page.id,
+            page.title,
+            page.updated_at,
+            page.parent_page_id
+        );
+    }
     Ok(Response {
         status: StatusCode::Ok,
         data: Some(serde_json::json!(pages)),
