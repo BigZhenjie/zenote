@@ -16,6 +16,9 @@ use crate::functions::pages::fetch_pages;
 use crate::functions::pages::fetch_page;
 use crate::functions::pages::update_page;
 
+
+//blocks
+use crate::functions::blocks::fetch_blocks;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -30,6 +33,7 @@ pub fn run() {
             fetch_pages,
             fetch_page,
             update_page,
+            fetch_blocks,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
