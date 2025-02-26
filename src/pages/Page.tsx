@@ -45,6 +45,8 @@ const Page = () => {
         setIsLoading(false);
         return;
       }
+      // now get blocks
+      
 
       setTitle(pageResponse.data.title);
       setIsLoading(false);

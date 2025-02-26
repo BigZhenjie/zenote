@@ -4,3 +4,4 @@ pub mod supabase;
 pub mod queries;
 pub mod pages;
 pub mod responses;
+pub mod blocks;
