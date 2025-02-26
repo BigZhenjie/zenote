@@ -80,16 +80,6 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
                 .map(|v| v.as_str().unwrap_or("").to_string()),
         })
         .collect();
-        println!("\n=== Pages Before Sorting ===");
-        for page in &pages {
-            println!(
-                "ID: {}, Title: '{}', Updated: {}, Parent: {:?}",
-                page.id,
-                page.title,
-                page.updated_at,
-                page.parent_page_id
-            );
-        }
         
     pages.sort_by(|a, b| {
         // Parse timestamp, adding UTC timezone if missing
@@ -114,17 +104,7 @@ pub async fn fetch_pages(user_id: String) -> Result<Response<serde_json::Value>,
         });
         b_date.cmp(&a_date)
     });
-    
-    println!("\n=== Pages After Sorting ===");
-    for page in &pages {
-        println!(
-            "ID: {}, Title: '{}', Updated: {}, Parent: {:?}",
-            page.id,
-            page.title,
-            page.updated_at,
-            page.parent_page_id
-        );
-    }
+
     Ok(Response {
         status: StatusCode::Ok,
         data: Some(serde_json::json!(pages)),
