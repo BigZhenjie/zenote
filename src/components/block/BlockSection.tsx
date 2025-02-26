@@ -1,8 +1,12 @@
-import React from 'react'
+import { BlockProps } from '@/types'
 
-const BlockSection = () => {
+const BlockSection = ({blocks}: {blocks: BlockProps[]}) => {
   return (
-    <div>BlockSection</div>
+    blocks.map((block: BlockProps) => (
+      <div key={block.id}>
+        {block.type}
+      </div>
+    ))
   )
 }
 
