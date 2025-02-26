@@ -1,5 +1,4 @@
 {
   "imports": {
-    "@std/uuid": "jsr:@std/uuid@^1.0.4"
-  }
+    "@std/uuid": "jsr:@std/uuid@^1.0.4"  }
 }

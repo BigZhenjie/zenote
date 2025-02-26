@@ -16,6 +16,7 @@
     "npm:class-variance-authority@~0.7.1": "0.7.1",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:framer-motion@^11.18.1": "11.18.1_react@18.3.1_react-dom@18.3.1__react@18.3.1",
+    "npm:lodash@^4.17.21": "4.17.21",
     "npm:lucide-react@0.474": "0.474.0_react@18.3.1",
     "npm:motion@^11.18.1": "11.18.1_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:postcss@^8.4.49": "8.4.49",
@@ -42,7 +43,7 @@
         "jsr:@std/bytes",
         "jsr:@std/crypto"
       ]
-    }
+    },
   },
   "npm": {
     "@alloc/quick-lru@5.2.0": {
@@ -870,6 +871,9 @@
     "lines-and-columns@1.2.4": {
       "integrity": "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg=="
     },
+    "lodash@4.17.21": {
+      "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
+    },
     "loose-envify@1.4.0": {
       "integrity": "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==",
       "dependencies": [
@@ -1317,7 +1321,8 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/uuid@^1.0.4"
+      "jsr:@std/uuid@^1.0.4",
+      "jsr:@tlevi/lodash@^1.0.1"
     ],
     "packageJson": {
       "dependencies": [
@@ -1333,6 +1338,7 @@
         "npm:class-variance-authority@~0.7.1",
         "npm:clsx@^2.1.1",
         "npm:framer-motion@^11.18.1",
+        "npm:lodash@^4.17.21",
         "npm:lucide-react@0.474",
         "npm:motion@^11.18.1",
         "npm:postcss@^8.4.49",
