@@ -61,3 +61,15 @@ declare type PageProps = {
   parent_page_id: string;
   profilePicUrl: string;
 };
+
+//------------------------------------------------Blocks------------------------------------------
+declare type BlockProps = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  type: string;
+  order: number;
+  content: string;
+  page_id: string;
+  parent_block_id: string;
+};
