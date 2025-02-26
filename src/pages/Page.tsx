@@ -38,15 +38,15 @@ const Page = () => {
 
     const fetchPageData = async () => {
       setIsLoading(true);
-      const response: Response = await invoke("fetch_page", {
+      const pageResponse: Response = await invoke("fetch_page", {
         pageId: pageId,
       });
-      if (!response.data ){
+      if (!pageResponse.data ){
         setIsLoading(false);
         return;
       }
 
-      setTitle(response.data.title);
+      setTitle(pageResponse.data.title);
       setIsLoading(false);
     };
     fetchPageData();
