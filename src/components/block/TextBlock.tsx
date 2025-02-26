@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react'
 const TextBlock = () => {
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
-
+  const [content, setContent] = useState('')
   return (
     <div 
       className='w-[80%] flex items-center'
@@ -15,6 +15,8 @@ const TextBlock = () => {
         {isHovered && <Plus size={30} className=' hover:bg-gray-100 rounded-md p-1' />}
       </div>
       <input 
+      value={content}
+        onChange={(e) => setContent(e.target.value)}
         type="text" 
         className='w-full outline-none'
         placeholder={isFocused ? "Type your text here..." : ""} 
