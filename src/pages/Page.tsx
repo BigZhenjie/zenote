@@ -5,6 +5,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/context/AuthContext";
 import { Response } from "@/types";
 import LoadingCircle from "@/components/LoadingCircle";
+import PageTitle from "@/components/home/page/PageTitle";
+
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!);
@@ -46,7 +48,11 @@ const Page = () => {
         return;
       }
       // now get blocks
-      
+      const blockResponse: Response = await invoke("fetch_blocks", {
+        pageId: pageId,
+      });
+
+      //block data can be empty
 
       setTitle(pageResponse.data.title);
       setIsLoading(false);
@@ -63,15 +69,7 @@ const Page = () => {
 
   return (
     <div className="w-full p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white">
-      <div className="max-w-[80%] w-[80%]">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="New page"
-          spellCheck="false"
-          className="mt-20 text-4xl p-2 outline-none font-bold placeholder:font-bold placeholder:opacity-40"
-        ></input>
-      </div>
+      <PageTitle title={title} setTitle={setTitle} />
     </div>
   );
 };
