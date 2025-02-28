@@ -1,11 +1,33 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { debounce } from "lodash";
+import { BlockProps } from "@/types";
+type OptionalBlockProps = {
+  id?: string; //could be null because of new block
+  created_at?: string;
+  updated_at?: string;
+  type?: string; //could be null because of new block
+  order?: number;
+  content?: string;
+  pageId: string; //page id must be passed in
+  parentBlockId?: string | null;
+  index?: number;
+  blocks: BlockProps[];
+}
 
-const TextBlock = () => {
+const Block = ({
+  index,
+  id,
+  pageId,
+  parentBlockId,
+  content,
+  type,
+  order,
+  blocks
+}: OptionalBlockProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [content, setContent] = useState("");
+  // const [content, setContent] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
   // Debounced update function
@@ -51,4 +73,4 @@ const TextBlock = () => {
   );
 };
 
-export default TextBlock;
+export default Block;

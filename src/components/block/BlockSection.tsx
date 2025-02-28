@@ -1,13 +1,15 @@
 import { BlockProps } from "@/types";
-import TextBlock from "./TextBlock";
+import Block from "./Block";
 
-const BlockSection = ({ blocks }: { blocks: BlockProps[] }) => {
+
+const BlockSection = ({ blocks, pageId }: { blocks: BlockProps[], pageId: string }) => {
   return (
     <div className="w-full flex justify-center">
       {blocks.map((block: BlockProps) => (
         <div key={block.id}>{block.type}</div>
       ))}
-      <TextBlock />
+      {/* the lonely block is the new block*/}
+      <Block blocks={blocks} pageId={pageId}/> 
     </div>
   );
 };
