@@ -4,12 +4,33 @@ import Block from "./Block";
 
 const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>, pageId: string }) => {
   return (
-    <div className="w-full flex justify-center">
-      {blocks.map((block: BlockProps) => (
-        <div key={block.id}>{block.type}</div>
+    <div className="w-full flex flex-col items-center">
+      {blocks.map((block: BlockProps, index: number) => (
+        <Block 
+          key={block.id}
+          id={block.id}
+          content={block.content}
+          type={block.type}
+          order={block.order}
+          pageId={pageId}
+          parentBlockId={block.parent_block_id}
+          index={index}
+          blocks={blocks}
+          setBlocks={setBlocks}
+        />
       ))}
-      {/* the lonely block is the new block*/}
-      <Block blocks={blocks} pageId={pageId} setBlocks={setBlocks}/>
+      
+      {/* If you still want a "new block" at the end */}
+      <Block 
+        pageId={pageId}
+        blocks={blocks}
+        setBlocks={setBlocks}
+        // Add any defaults for a new block
+        type="text"
+        content=""
+        order={blocks.length}
+        index={blocks.length}
+      />
     </div>
   );
 };
