@@ -3,6 +3,7 @@ import Block from "./Block";
 
 
 const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>, pageId: string }) => {
+  console.log("Blcoks: ", blocks)
   return (
     <div className="w-full flex flex-col items-center">
       {blocks.map((block: BlockProps, index: number) => (
@@ -13,7 +14,7 @@ const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], set
           type={block.type}
           order={block.order}
           pageId={pageId}
-          parentBlockId={block.parent_block_id}
+          parentBlockId={block.parentBlockId}
           index={index}
           blocks={blocks}
           setBlocks={setBlocks}

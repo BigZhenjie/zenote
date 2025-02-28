@@ -34,28 +34,37 @@ pub async fn fetch_blocks(page_id: String) -> Result<Response<serde_json::Value>
             error: None,
         });
     }
+
     let mut blocks: Vec<Block> = data
-        .iter()
-        .map(| block| Block {
-            id: block["id"].as_str().unwrap_or_default().to_string(),
-            created_at: block["created_at"].as_str().unwrap_or_default().to_string(),
-            updated_at: block["updated_at"].as_str().unwrap_or_default().to_string(),
-            block_type: block["type"].as_str().unwrap_or_default().to_string(),
-            order: block["order"].as_i64().unwrap_or_default() as i32,
-            content: block["content"].as_str().unwrap_or_default().to_string(),
-            page_id: block["page_id"].as_str().unwrap_or_default().to_string(),
-            parent_block_id: block["parent_block_id"]
-                .as_str()
-                .map(|s| s.to_string()),
-        })
-        .collect();
-        
+    .iter()
+    .map(|block| Block {
+        // Handle id as either a number or a string
+        id: if block["id"].is_i64() || block["id"].is_u64() {
+            block["id"].as_i64().map_or_else(
+                || block["id"].as_u64().unwrap_or_default().to_string(),
+                |id| id.to_string()
+            )
+        } else {
+            block["id"].as_str().unwrap_or_default().to_string()
+        },
+        created_at: block["created_at"].as_str().unwrap_or_default().to_string(),
+        updated_at: block["updated_at"].as_str().unwrap_or_default().to_string(),
+        block_type: block["type"].as_str().unwrap_or_default().to_string(),
+        order: block["order"].as_i64().unwrap_or_default() as i32,
+        content: block["content"].as_str().unwrap_or_default().to_string(),
+        page_id: block["page_id"].as_str().unwrap_or_default().to_string(),
+        parent_block_id: block["parent_block_id"]
+            .as_str()
+            .map(|s| s.to_string()),
+    })
+    .collect();
+    
+    println!("blocks: {:?}", blocks);
     blocks.sort_by(|a, b| {
         // Parse timestamp, adding UTC timezone if missing
         a.order.cmp(&b.order)
     });
     
-
     Ok(Response {
         status: StatusCode::Ok,
         data: Some(serde_json::json!(blocks)),
@@ -132,7 +141,6 @@ pub async fn create_block(
     parent_block_id: Option<String>,
     order: i32,
     block_type: String,
-    user_id: String,
 ) -> Result<Response<serde_json::Value>, String> {
     let supabase_client = initialize_supabase_client().await;
 
@@ -151,9 +159,9 @@ pub async fn create_block(
         "order": order,
         "type": block_type,
         "updated_at": chrono::Utc::now().to_rfc3339(),
-        "user_id": user_id,
+        "created_at": chrono::Utc::now().to_rfc3339(),
     });
-
+    println!("body: {:?}", body);
     let result = supabase_client
         .insert("blocks", body)
         .await?;

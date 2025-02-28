@@ -65,11 +65,11 @@ declare type PageProps = {
 //------------------------------------------------Blocks------------------------------------------
 declare type BlockProps = {
   id: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   type: string;
   order: number;
   content: string;
-  page_id: string;
-  parent_block_id: string;
+  pageId: string;
+  parentBlockId: string;
 };
