@@ -234,12 +234,6 @@ pub async fn update_page(
     let supabase_url = env::var("SUPABASE_URL").map_err(|e| e.to_string())?;
     let supabase_key = env::var("SUPABASE_API_KEY").map_err(|e| e.to_string())?;
 
-    // let body = serde_json::json!({
-    //     "id": page_id,
-    //     "title": title,
-    //     "parent_page_id": parent_page_id,
-    //     "updated_at": chrono::Utc::now().to_rfc3339(),
-    // });
     let body = serde_json::json!({
         "id": page_id,
         "title": title,
@@ -256,7 +250,6 @@ pub async fn update_page(
         "user_id": user_id,
     });
     
-    println!("Body: {:?}", body);
     let result = update(
         &supabase_url,
         &supabase_key,
@@ -266,7 +259,6 @@ pub async fn update_page(
         body
     ).await?;
     
-    println!("Update result: {:?}", result);
 
     Ok(Response {
         status: StatusCode::Ok,

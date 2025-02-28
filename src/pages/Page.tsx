@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { usePage } from "@/hooks/usePage";
 import { invoke } from "@tauri-apps/api/core";
@@ -8,6 +8,8 @@ import LoadingCircle from "@/components/LoadingCircle";
 import PageTitle from "@/components/home/page/PageTitle";
 import BlockSection from "@/components/block/BlockSection";
 import { BlockProps } from "@/types";
+import { debounce } from "lodash";
+
 const Page = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const pageData = usePage(pageId!);
@@ -15,11 +17,10 @@ const Page = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [blocks, setBlocks] = useState<BlockProps[]>([]);
-  // Auto-save every 10 seconds
-  useEffect(() => {
-    if (!pageId) return;
 
-    const interval = setInterval(async () => {
+  const debouncedUpdate = useCallback(
+    debounce(async (title) => {
+      // Your Supabase update code here
       try {
         await invoke("update_page", {
           pageId: pageId,
@@ -30,10 +31,17 @@ const Page = () => {
       } catch (error) {
         console.error("Failed to auto-save page:", error);
       }
-    }, 10000);
+    }, 1000), // 1 second delay
+    []
+  );
 
-    return () => clearInterval(interval);
-  }, [pageId, title, pageData?.parent_page_id]);
+  useEffect(() => {
+    if (!pageId) return;
+
+    if (title) {
+      debouncedUpdate(title);
+    }
+  }, [title, debouncedUpdate]);
 
   // Fetch page data on mount
   useEffect(() => {
@@ -44,7 +52,7 @@ const Page = () => {
       const pageResponse: Response = await invoke("fetch_page", {
         pageId: pageId,
       });
-      if (!pageResponse.data ){
+      if (!pageResponse.data) {
         setIsLoading(false);
         return;
       }
@@ -54,7 +62,7 @@ const Page = () => {
       });
       console.log("Block response: ", blockResponse);
       //block data can be empty
-      if (blockResponse.data){
+      if (blockResponse.data) {
         setBlocks(blockResponse.data);
       }
 
@@ -64,11 +72,12 @@ const Page = () => {
     fetchPageData();
   }, [pageId]);
 
-
   if (isLoading) {
-    return <div className="w-full">
-      <LoadingCircle />
-    </div>;
+    return (
+      <div className="w-full">
+        <LoadingCircle />
+      </div>
+    );
   }
 
   return (
