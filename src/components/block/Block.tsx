@@ -13,7 +13,8 @@ type OptionalBlockProps = {
   parentBlockId?: string | null;
   index?: number;
   blocks: BlockProps[];
-}
+  setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>;
+};
 
 const Block = ({
   index,
@@ -23,12 +24,29 @@ const Block = ({
   content,
   type,
   order,
-  blocks
+  blocks,
+  setBlocks,
 }: OptionalBlockProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  // const [content, setContent] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+
+  const updateContent = useCallback(
+    (newContent: string) => {
+      setBlocks(
+        blocks.map((block) => {
+          if (block.id === id) {
+            return {
+              ...block,
+              content: newContent,
+            };
+          }
+          return block;
+        })
+      );
+    },
+    [blocks, id]
+  );
 
   // Debounced update function
   const debouncedUpdate = useCallback(
@@ -50,25 +68,24 @@ const Block = ({
 
   return (
     <div
-      className="w-[80%] flex items-center"
+      className="w-[80%] flex items-center relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="w-8 h-8 mr-2 flex items-center justify-center">
-        {isHovered && (
-          <Plus size={30} className="hover:bg-gray-100 rounded-md p-1" />
-        )}
-      </div>
+      {isHovered && (
+        <Plus size={30} className="hover:bg-gray-100 rounded-md p-1 absolute left-0 translate-x-[-100%]" />
+      )}
+
       <input
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        onChange={(e) => updateContent(e.target.value)}
         type="text"
         className="w-full outline-none"
         placeholder={isFocused ? "Type your text here..." : ""}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
-      {isTyping && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
+      {isTyping && <span className="text-xs text-gray-400">Saving...</span>}
     </div>
   );
 };

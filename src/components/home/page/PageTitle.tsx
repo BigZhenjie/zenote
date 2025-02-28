@@ -8,7 +8,7 @@ const PageTitle = ({title, setTitle}: {title: string, setTitle: React.Dispatch<R
       onChange={(e) => setTitle(e.target.value)}
       placeholder="New page"
       spellCheck="false"
-      className="mt-20 text-4xl p-2 h-14 outline-none font-bold placeholder:font-bold placeholder:opacity-40"
+      className="mt-20 text-4xl h-14 outline-none font-bold placeholder:font-bold placeholder:opacity-40"
     ></input>
   </div>
   )

@@ -83,7 +83,7 @@ const Page = () => {
   return (
     <div className="w-full  p-8 overflow-y-auto flex flex-col items-center rounded-xl ml-4 bg-white">
       <PageTitle title={title} setTitle={setTitle} />
-      <BlockSection blocks={blocks} />
+      <BlockSection blocks={blocks} setBlocks={setBlocks} pageId={pageId!} />
     </div>
   );
 };
