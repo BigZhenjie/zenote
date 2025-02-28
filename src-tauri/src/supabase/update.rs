@@ -14,7 +14,6 @@ pub async fn update(
         "{}/rest/v1/{}?{}=eq.{}",
         supabase_url, table_name, column_name, value
     );
-    println!("Endpoint: {}", endpoint);
     
     // Create an HTTP client
     let client = Client::new();
@@ -34,9 +33,6 @@ pub async fn update(
         Ok(resp) => {
             let status = resp.status();
             let error_body = resp.text().await.unwrap_or_default(); // Get the response body
-            println!("Response Status: {}", status);
-            println!("Response Body: {}", error_body); // Print the response body for debugging
-
             if status.is_success() {
                 Ok(value.to_string())
             } else {
