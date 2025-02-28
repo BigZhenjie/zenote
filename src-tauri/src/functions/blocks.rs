@@ -59,7 +59,7 @@ pub async fn fetch_blocks(page_id: String) -> Result<Response<serde_json::Value>
     })
     .collect();
     
-    println!("blocks: {:?}", blocks);
+
     blocks.sort_by(|a, b| {
         // Parse timestamp, adding UTC timezone if missing
         a.order.cmp(&b.order)
