@@ -21,10 +21,11 @@ const Page = () => {
   const debouncedUpdate = useCallback(
     debounce(async (title) => {
       // Your Supabase update code here
+      if (!user) return;
       try {
         await invoke("update_page", {
           pageId: pageId,
-          userId: String(user?.id),
+          userId: String(user.id),
           title: title,
           parentPageId: pageData?.parent_page_id,
         });
