@@ -97,7 +97,6 @@ pub async fn update_block(
     parent_block_id: Option<String>,
     order: i32,
     block_type: String,
-    user_id: String,
 ) -> Result<Response<serde_json::Value>, String> {
     let supbase_client = initialize_supabase_client().await;
 
@@ -117,7 +116,6 @@ pub async fn update_block(
         "order": order,
         "type": block_type,
         "updated_at": chrono::Utc::now().to_rfc3339(),
-        "user_id": user_id,
     });
     println!("body: {:?}", body);
 

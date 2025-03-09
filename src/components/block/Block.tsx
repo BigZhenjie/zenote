@@ -3,7 +3,6 @@ import { Plus } from "lucide-react";
 import { debounce} from "lodash";
 import { BlockProps, Response } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
-import { useAuth } from "@/context/AuthContext";
 type OptionalBlockProps = {
   id?: string;
   created_at?: string;
@@ -37,7 +36,6 @@ const Block = ({
 
   // Check both index and whether it's already been saved
   const isNewBlock = index === blocks.length && !isSaved;
-  const {user} = useAuth()
 
   // Debounced update function for database
   const debouncedUpdate = useCallback(
@@ -101,7 +99,6 @@ const Block = ({
             pageId: pageId,
             blockType: type,
             order: order,
-            userId: user?.id,
           });
         }
       } catch (error) {
