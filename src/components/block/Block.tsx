@@ -101,6 +101,7 @@ const Block = ({
             order: order,
           });
         }
+        
       } catch (error) {
         console.error(`Failed to ${isNewBlock ? "create" : "update"} block:`, error);
       } finally {
