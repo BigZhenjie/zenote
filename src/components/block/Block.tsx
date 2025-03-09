@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
-import { debounce, set } from "lodash";
+import { debounce} from "lodash";
 import { BlockProps, Response } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
-
+import { useAuth } from "@/context/AuthContext";
 type OptionalBlockProps = {
   id?: string;
   created_at?: string;
@@ -37,35 +37,7 @@ const Block = ({
 
   // Check both index and whether it's already been saved
   const isNewBlock = index === blocks.length && !isSaved;
-
-  const updateContent = useCallback(
-    (newContent: string) => {
-      setLocalContent(newContent);
-
-      if (isNewBlock) {
-        // Only create a new block if content is not empty
-        if (newContent.trim() !== "") {
-          // We don't update blocks array here - we'll do it after successful API call
-          setIsTyping(true);
-        }
-      } else {
-        // For existing blocks, update the content in the blocks array
-        setBlocks((prevBlocks) =>
-          prevBlocks.map((block, idx) => {
-            if (idx === index) {
-              return {
-                ...block,
-                content: newContent,
-              };
-            }
-            return block;
-          })
-        );
-        setIsTyping(true);
-      }
-    },
-    [isNewBlock, index, setBlocks]
-  );
+  const {user} = useAuth()
 
   // Debounced update function for database
   const debouncedUpdate = useCallback(
@@ -74,8 +46,9 @@ const Block = ({
         if (isNewBlock) {
           // Only create if there's content
           if (content.trim() !== "") {
-            console.log("Creating new block:", content);
-            console.log(`pageId: ${pageId}`);
+            if (localContent !== "") {
+              setIsTyping(true);
+            }
             const newBlockData = {
               content: content,
               pageId: pageId,
@@ -110,12 +83,25 @@ const Block = ({
           // Update existing block - no change here
           console.log("Updating block:", id, content);
 
+          setBlocks((prevBlocks) =>
+            prevBlocks.map((block, idx) => {
+              if (idx === index) {
+                return {
+                  ...block,
+                  content: localContent,
+                };
+              }
+              return block;
+            })
+          );
+
           await invoke("update_block", {
-            id: id,
+            blockId: id,
             content: content,
             pageId: pageId,
-            type: type,
+            blockType: type,
             order: order,
+            userId: user?.id,
           });
         }
       } catch (error) {
@@ -128,11 +114,15 @@ const Block = ({
   );
 
   // Trigger the debounced update when content changes
-  useEffect(() => {
-    if (localContent !== content) {
-      debouncedUpdate(localContent);
-    }
-  }, [localContent, content, debouncedUpdate]);
+// Trigger the debounced update when content changes
+useEffect(() => {
+  if (localContent !== content) {
+    debouncedUpdate(localContent);
+    return () => {
+      debouncedUpdate.cancel(); // Cancel pending debounces on cleanup
+    };
+  }
+}, [localContent, content, debouncedUpdate]);
 
   return (
     <div
@@ -149,7 +139,7 @@ const Block = ({
 
       <input
         value={localContent}
-        onChange={(e) => updateContent(e.target.value)}
+        onChange={(e) => setLocalContent(e.target.value)}
         type="text"
         className="w-full outline-none row-auto hover:border-gray-200 focus:border-gray-300 transition-colors"
         placeholder={isFocused || isNewBlock ? "Type your text here..." : ""}

@@ -119,6 +119,7 @@ pub async fn update_block(
         "updated_at": chrono::Utc::now().to_rfc3339(),
         "user_id": user_id,
     });
+    println!("body: {:?}", body);
 
     let result = supbase_client
     .update("blocks", &block_id, body).await?;
@@ -126,7 +127,7 @@ pub async fn update_block(
     // Parse the string result into a JSON value
     let result_json = serde_json::from_str::<serde_json::Value>(&result)
         .map_err(|e| e.to_string())?;
-
+    println!("result_json: {:?}", result_json);
     Ok(Response {
         status: StatusCode::Ok,
         data: Some(result_json),
