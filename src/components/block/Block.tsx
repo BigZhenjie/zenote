@@ -33,6 +33,30 @@ const Block = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [localContent, setLocalContent] = useState(content);
+  const [imageSrc, setImageSrc] = useState('');
+
+  const handlePaste = async (event) => {
+    try {
+      if (!navigator.clipboard) {
+        console.error("Clipboard API not available");
+        return;
+      }
+
+      const clipboardItems = await navigator.clipboard.read();
+      for (const clipboardItem of clipboardItems) {
+        const imageTypes = clipboardItem.types.find(type => type.startsWith('image/'));
+
+        if (imageTypes) {
+          const blob = await clipboardItem.getType(imageTypes);
+          const url = URL.createObjectURL(blob);
+          setImageSrc(url);
+          break; // Assuming we need the first image
+        }
+      }
+    } catch (err) {
+      console.error("Failed to read clipboard:", err);
+    }
+  };
 
   // Check both index and whether it's already been saved
   const isNewBlock = index === blocks.length && !isSaved;
@@ -111,8 +135,6 @@ const Block = ({
     [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId, setBlocks]
   );
 
-  // Trigger the debounced update when content changes
-// Trigger the debounced update when content changes
 useEffect(() => {
   if (localContent !== content) {
     debouncedUpdate(localContent);
@@ -135,18 +157,24 @@ useEffect(() => {
         />
       )}
 
-      <input
-        value={localContent}
-        onChange={(e) => setLocalContent(e.target.value)}
-        type="text"
-        className="w-full outline-none row-auto hover:border-gray-200 focus:border-gray-300 transition-colors"
-        placeholder={isFocused || isNewBlock ? "Type your text here..." : ""}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      />
-      {isTyping && (
-        <span className="text-xs text-gray-400 ml-2">Saving...</span>
+      {imageSrc ? (
+        <img src={imageSrc} alt="Pasted content" />
+      ) : (
+        <input
+          value={localContent}
+          onChange={(e) => setLocalContent(e.target.value)}
+          type="text"
+          className="w-full outline-none row-auto hover:border-gray-200 focus:border-gray-300 transition-colors h-auto"
+          placeholder={isFocused || isNewBlock ? "Type your text here..." : ""}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onPaste={handlePaste}
+        />
       )}
+      
+      {/* {isTyping && (
+        <span className="text-xs text-gray-400 ml-2">Saving...</span>
+      )} */}
     </div>
   );
 };
