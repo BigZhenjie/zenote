@@ -21,6 +21,7 @@ use crate::functions::pages::update_page;
 use crate::functions::blocks::fetch_blocks;
 use crate::functions::blocks::update_block;
 use crate::functions::blocks::create_block;
+use crate::functions::blocks::delete_block;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -39,6 +40,7 @@ pub fn run() {
             fetch_blocks,
             update_block,
             create_block,
+            delete_block,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

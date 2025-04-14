@@ -123,7 +123,7 @@ pub async fn update_block(
     .update("blocks", &block_id, body).await?;
 
     // Parse the string result into a JSON value
-    let result_json = serde_json::from_str::<serde_json::Value>(&result)
+    let result_json = serde_json::from_str::<serde_json::Value>(&result.to_string())
         .map_err(|e| e.to_string())?;
     println!("result_json: {:?}", result_json);
     Ok(Response {
@@ -167,6 +167,30 @@ pub async fn create_block(
     // Parse the string result into a JSON value
     let result_json = serde_json::from_str::<serde_json::Value>(&result)
         .map_err(|e| e.to_string())?;
+
+    Ok(Response {
+        status: StatusCode::Ok,
+        data: Some(result_json),
+        error: None,
+    })
+}
+
+
+#[tauri::command]
+pub async fn delete_block(block_id: String) -> Result<Response<serde_json::Value>, String> {
+    let supabase_client = initialize_supabase_client().await;
+    let result = supabase_client
+        .delete("blocks", &block_id)
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    println!("result: {:?}", result);
+    
+    // Create a result JSON with the deleted block id
+    let result_json = serde_json::json!({
+        "id": block_id,
+        "deleted": true
+    });
 
     Ok(Response {
         status: StatusCode::Ok,

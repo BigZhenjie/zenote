@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { debounce} from "lodash";
 import { BlockProps, Response } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
@@ -68,9 +68,8 @@ const Block = ({
         if (isNewBlock) {
           // Only create if there's content
           if (content.trim() !== "") {
-            if (localContent !== "") {
-              setIsTyping(true);
-            }
+            setIsTyping(true);
+            
             const newBlockData = {
               content: content,
               pageId: pageId,
@@ -81,58 +80,66 @@ const Block = ({
             
             // Call create_block API
             const response: Response = await invoke("create_block", newBlockData);
-            console.log("Response for creating block: ", response);
             
             // Mark block as saved to prevent repeating
             setIsSaved(true);
             
-            // When setting blocks, convert blockType back to type
-            setBlocks((prevBlocks) => [
-              ...prevBlocks,
-              {
-                ...newBlockData,
+            if (response.data && response.status === 200) {
+              // Extract the first item if response.data is an array
+              const blockData = Array.isArray(response.data) ? response.data[0] : response.data;
+              // Create new block with correct structure
+              const newBlock: BlockProps = {
+                // Handle case where blockData is just the ID number
+                id: typeof blockData === 'object' ? (blockData.id || "") : String(blockData),
+                createdAt: typeof blockData === 'object' ? (blockData.created_at || new Date().toISOString()) : new Date().toISOString(),
+                updatedAt: typeof blockData === 'object' ? (blockData.updated_at || new Date().toISOString()) : new Date().toISOString(),
                 type: newBlockData.blockType,
-                id: response.data,
-                createdAt: response.data.created_at,
-                updatedAt: response.data.updated_at,
-              } as BlockProps,
-            ]);
-
-            console.log("newBlockData: ", newBlockData);
-            setLocalContent("");
+                order: newBlockData.order,
+                content: newBlockData.content,
+                pageId: newBlockData.pageId,
+                parentBlockId: newBlockData.parentBlockId || "",
+              };
+              
+              // Add the new block to the state - important to use a callback to ensure we have the latest state
+              setBlocks(prevBlocks => [...prevBlocks, newBlock]);
+              
+              // Reset local content for this component
+              setLocalContent("");
+              
+              // Reset isSaved state to allow this component to create another block
+              // This is crucial - without it the component won't recognize itself as a "new block" creator again
+              setTimeout(() => {
+                setIsSaved(false);
+              }, 100);
+            }
           }
-        } else {
-          // Update existing block - no change here
-          console.log("Updating block:", id, content);
-
-          setBlocks((prevBlocks) =>
-            prevBlocks.map((block, idx) => {
-              if (idx === index) {
-                return {
-                  ...block,
-                  content: localContent,
-                };
-              }
-              return block;
-            })
-          );
-
+        } else if (id) {
+          // Update existing block
           await invoke("update_block", {
             blockId: id,
             content: content,
             pageId: pageId,
-            blockType: type,
+            parentBlockId: parentBlockId,
             order: order,
+            blockType: type,
           });
+          
+          // Update the block in the state
+          setBlocks(prevBlocks =>
+            prevBlocks.map(block => 
+              block.id === id 
+                ? { ...block, content, updatedAt: new Date().toISOString() }
+                : block
+            )
+          );
         }
-        
       } catch (error) {
         console.error(`Failed to ${isNewBlock ? "create" : "update"} block:`, error);
       } finally {
         setIsTyping(false);
       }
     }, 1000),
-    [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId, setBlocks]
+    [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId]
   );
 
 useEffect(() => {
@@ -151,10 +158,16 @@ useEffect(() => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {isHovered && (
+        <div className="absolute left-0 translate-x-[-100%] flex justify-end">
         <Plus
-          size={30}
-          className="hover:bg-gray-100 rounded-md p-1 absolute left-0 translate-x-[-100%]"
+          size={25}
+          className="hover:bg-gray-100 rounded-md p-1"
         />
+        <Trash2 
+          size={25}
+          className=" hover:bg-gray-100 rounded-md p-1"
+        />
+      </div>
       )}
 
       {imageSrc ? (

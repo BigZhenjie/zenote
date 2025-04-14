@@ -3,7 +3,7 @@ import Block from "./Block";
 
 
 const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>, pageId: string }) => {
-  console.log("Blcoks: ", blocks)
+  console.log("BlockSection blocks: ", blocks);
   return (
     <div className="w-full flex flex-col items-center">
       {blocks.map((block: BlockProps, index: number) => (
@@ -23,6 +23,8 @@ const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], set
       
       {/* If you still want a "new block" at the end */}
       <Block 
+       key="new-block" // Unique key for the new block
+        id={""} // No ID for new block
         pageId={pageId}
         blocks={blocks}
         setBlocks={setBlocks}
