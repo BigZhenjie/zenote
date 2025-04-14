@@ -142,6 +142,15 @@ const Block = ({
     [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId]
   );
 
+  const deleteBlock = async (id: string) => {
+    try {
+      await invoke("delete_block", { blockId: id });
+      setBlocks(prevBlocks => prevBlocks.filter(block => block.id !== id));
+    } catch (error) {
+      console.error("Failed to delete block:", error);
+    }
+  }
+
 useEffect(() => {
   if (localContent !== content) {
     debouncedUpdate(localContent);
@@ -166,6 +175,7 @@ useEffect(() => {
         {id && <Trash2 
           size={25}
           className=" hover:bg-gray-100 rounded-md p-1"
+          onClick={() => deleteBlock(id)}
         />}
       </div>
       )}
