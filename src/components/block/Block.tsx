@@ -163,10 +163,10 @@ useEffect(() => {
           size={25}
           className="hover:bg-gray-100 rounded-md p-1"
         />
-        <Trash2 
+        {id && <Trash2 
           size={25}
           className=" hover:bg-gray-100 rounded-md p-1"
-        />
+        />}
       </div>
       )}
 
