@@ -1,9 +1,13 @@
 import { BlockProps } from "@/types";
 import Block from "./Block";
 import ImageBlock from "./ImageBlock";
+import { useEffect, useState } from "react";
 
 const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>, pageId: string }) => {
-  console.log("BlockSection blocks: ", blocks);
+  const [isPastingImage, setIsPastingImage] = useState(false);
+
+  
+
   return (
     <div className="w-full flex flex-col items-center">
       {blocks.map((block: BlockProps, index: number) => (
