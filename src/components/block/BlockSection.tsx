@@ -1,6 +1,6 @@
 import { BlockProps } from "@/types";
 import Block from "./Block";
-
+import ImageBlock from "./ImageBlock";
 
 const BlockSection = ({ blocks, setBlocks, pageId }: { blocks: BlockProps[], setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>, pageId: string }) => {
   console.log("BlockSection blocks: ", blocks);
