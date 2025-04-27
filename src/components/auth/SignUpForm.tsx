@@ -60,8 +60,9 @@ const SignUpForm = () => {
           bucket: "avatars",
           path: `${avatarFile.name}`,
           filePath,
-          supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
-          supabaseKey: import.meta.env.VITE_SUPABASE_AUTH_TOKEN,
+          supabaseUrl: import.meta.env.SUPABASE_URL,
+          supabaseKey: import.meta.env.SUPABASE_AUTH_TOKEN,
+          deleteAfterUpload: true,
         });
         const avatarPath: string = JSON.parse(response.response).Key;
         avatarUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + avatarPath;
