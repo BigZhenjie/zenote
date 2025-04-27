@@ -4,7 +4,7 @@ import ImageBlock from "./ImageBlock";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Response } from "@/types";
-import {v4 as uuidv4} from "uuid"
+import { v4 as uuidv4 } from "uuid";
 const BlockSection = ({
   blocks,
   setBlocks,
@@ -19,22 +19,26 @@ const BlockSection = ({
   useEffect(() => {
     const createImageBlock = async (bytes: Uint8Array) => {
       try {
-
         const filePath = await invoke("save_temp_file", {
           fileBytes: Array.from(bytes),
         });
-        console.log(import.meta.env.VITE_SUPABASE_URL)
-        const response: {response: string, success: boolean} = await invoke("upload_file", {
-          bucket: "images",
-          path: uuidv4(),
-          filePath,
-          supabaseUrl: import.meta.env.SUPABASE_URL,
-          supabaseKey: import.meta.env.SUPABASE_AUTH_TOKEN,
-          deleteAfterUpload: true,
-        })
-        
+
+        const response: { response: string; success: boolean } = await invoke(
+          "upload_file",
+          {
+            bucket: "images",
+            path: uuidv4(),
+            filePath,
+            supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+            supabaseKey: import.meta.env.VITE_SUPABASE_API_KEY,
+            deleteAfterUpload: true,
+          }
+        );
+
         const imagePath: string = JSON.parse(response.response).Key;
-        const imageUrl = "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" + imagePath;
+        const imageUrl =
+          "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" +
+          imagePath;
 
         const newBlockData = {
           content: imageUrl,
@@ -44,9 +48,16 @@ const BlockSection = ({
           parentBlockId: null,
         };
 
-        const create_response: Response = await invoke("create_block", newBlockData);
+        const create_response: Response = await invoke(
+          "create_block",
+          newBlockData
+        );
 
-        if (create_response && create_response.data && create_response.status === 200) {
+        if (
+          create_response &&
+          create_response.data &&
+          create_response.status === 200
+        ) {
           const blockData = Array.isArray(create_response.data)
             ? create_response.data[0]
             : create_response.data;
@@ -113,8 +124,8 @@ const BlockSection = ({
             if (imageType) {
               hasImage = true;
               const blob = await item.getType(imageType);
-              const arrayBuffer = await blob.arrayBuffer()
-              const bytes = new Uint8Array(arrayBuffer)
+              const arrayBuffer = await blob.arrayBuffer();
+              const bytes = new Uint8Array(arrayBuffer);
 
               await createImageBlock(bytes);
               break;
@@ -130,29 +141,47 @@ const BlockSection = ({
         setIsPastingImage(false);
       }
     };
-    document.addEventListener('paste', handlePaste);
-    
+    document.addEventListener("paste", handlePaste);
+
     return () => {
-      document.removeEventListener('paste', handlePaste);
+      document.removeEventListener("paste", handlePaste);
     };
   }, [blocks.length, pageId, isPastingImage, setBlocks]);
 
   return (
     <div className="w-full flex flex-col items-center">
-      {blocks.map((block: BlockProps, index: number) => (
-        <Block
-          key={block.id}
-          id={block.id}
-          content={block.content}
-          type={block.type}
-          order={block.order}
-          pageId={pageId}
-          parentBlockId={block.parentBlockId}
-          index={index}
-          blocks={blocks}
-          setBlocks={setBlocks}
-        />
-      ))}
+      {blocks.map((block: BlockProps, index: number) => {
+        if (block.type == "image") {
+          return (
+            <ImageBlock
+              key={block.id}
+              id={block.id}
+              content={block.content}
+              type={block.type}
+              order={block.order}
+              pageId={pageId}
+              parentBlockId={block.parentBlockId}
+              index={index}
+              blocks={blocks}
+              setBlocks={setBlocks}
+            />
+          );
+        }
+        return (
+          <Block
+            key={block.id}
+            id={block.id}
+            content={block.content}
+            type={block.type}
+            order={block.order}
+            pageId={pageId}
+            parentBlockId={block.parentBlockId}
+            index={index}
+            blocks={blocks}
+            setBlocks={setBlocks}
+          />
+        );
+      })}
 
       {/* If you still want a "new block" at the end */}
       <Block
