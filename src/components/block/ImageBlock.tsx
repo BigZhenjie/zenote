@@ -155,7 +155,7 @@ const ImageBlock = ({ id, content = "", index, blocks, setBlocks }: OptionalBloc
 
   return (
     <div
-      className="w-[80%] flex flex-col items-center relative mb-2"
+      className="w-[80%] flex flex-col items-start relative mb-2"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
