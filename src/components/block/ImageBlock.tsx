@@ -20,12 +20,17 @@ interface ImageContent {
 // Utility to parse content
 const parseContent = (content: string): ImageContent => {
   try {
-    if (content.startsWith("{")) return JSON.parse(content);
-  } catch {}
-  return { url: content };
+    const url = new URL(content);
+    const width = url.searchParams.get("width") || "auto";
+    const height = url.searchParams.get("height") || "auto";
+    console.log(url.origin + url.pathname)
+    return { url: url.origin + url.pathname, width, height };
+  } catch {
+    return { url: content, width: "auto", height: "auto" };
+  }
 };
 
-const ImageBlock = ({ id, content = "", index, blocks, setBlocks }: OptionalBlockProps) => {
+const ImageBlock = ({ id, content = "", index, blocks, setBlocks, pageId }: OptionalBlockProps) => {
   const { url: imageUrl, width: initW, height: initH } = useMemo(
     () => parseContent(content),
     [content]
@@ -60,16 +65,26 @@ const ImageBlock = ({ id, content = "", index, blocks, setBlocks }: OptionalBloc
     () =>
       debounce(async (w: string | number, h: string | number) => {
         if (!id) return;
-        const contentObj = parseContent(content);
-        const updated = JSON.stringify({ url: contentObj.url, width: w, height: h });
         try {
-          await invoke('update_block', { block: { id, content: updated, type: 'image' } });
-          setBlocks(bs => bs.map(b => (b.id === id ? { ...b, content: updated } : b)));
+          const url = new URL(imageUrl);
+          url.searchParams.set("width", String(w));
+          url.searchParams.set("height", String(h));
+          const updatedUrl = url.toString();
+  
+          await invoke("update_block", {
+            blockId: id,
+            content: updatedUrl, // The updated content (e.g., JSON string with URL and dimensions)
+            pageId: pageId,
+            parentBlockId: null, // Or the actual parent block ID if applicable
+            order: index, // Use the block's index as the order
+            blockType: "image", // Specify the block type as "image"
+          });
+          setBlocks((bs) => bs.map((b) => (b.id === id ? { ...b, content: updatedUrl } : b)));
         } catch (err) {
           console.error(err);
         }
       }, 500),
-    [id, content, setBlocks]
+    [id, imageUrl, setBlocks]
   );
 
   // Cancel on unmount
@@ -155,59 +170,76 @@ const ImageBlock = ({ id, content = "", index, blocks, setBlocks }: OptionalBloc
 
   return (
     <div
-      className="w-[80%] flex flex-col items-start relative mb-2"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    className="w-[80%] flex flex-col items-start relative mb-2"
+    onMouseEnter={() => setIsHovered(true)}
+    onMouseLeave={() => setIsHovered(false)}
+  >
       {isHovered && (
-        <div className="absolute left-0 translate-x-[-100%] flex justify-end">
-          <Plus size={25} className="hover:bg-gray-100 rounded p-1" />
-          {id && <Trash2 size={25} className="hover:bg-gray-100 rounded p-1" onClick={deleteBlock} />}
-          <Maximize2 size={25} className="hover:bg-gray-100 rounded p-1" onClick={() => setShowSizeControls(s => !s)} title="Adjust image size" />
-        </div>
-      )}
-
-      {showSizeControls && (
-        <div className="w-full mb-2 flex items-center gap-2 p-2 bg-gray-50 rounded">
-          <label className="text-xs">W:</label>
-          <input value={dimensions.width} onChange={handleWidthChange} className="w-20 text-sm border rounded px-1" />
-          <label className="text-xs">H:</label>
-          <input value={dimensions.height} onChange={handleHeightChange} className="w-20 text-sm border rounded px-1" />
-          <button onClick={setFull} className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Full</button>
-          <button onClick={setSmall} className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Small</button>
-        </div>
-      )}
-
-      <div className="relative inline-block">
-        <img
-          ref={imgRef}
-          src={imageUrl}
-          alt=""
-          style={{ width: dimensions.width, height: dimensions.height }}
-          className="max-w-full"
-        />
-
-        {isHovered && (
-          <>        
-            <div
-              className="absolute bottom-0 right-0 w-4 h-4 bg-white border border-gray-400 cursor-se-resize"
-              onMouseDown={e => startResize(e, 'both')}
-              style={{ transform: 'translate(25%,25%)' }}
-            />
-            <div
-              className="absolute bottom-0 left-1/2 w-4 h-4 bg-white border border-gray-400 cursor-s-resize"
-              onMouseDown={e => startResize(e, 'height')}
-              style={{ transform: 'translate(-50%,50%)' }}
-            />
-            <div
-              className="absolute top-1/2 right-0 w-4 h-4 bg-white border border-gray-400 cursor-e-resize"
-              onMouseDown={e => startResize(e, 'width')}
-              style={{ transform: 'translate(50%,-50%)' }}
-            />
-          </>
-        )}
+      <div className="absolute left-0 translate-x-[-100%] flex justify-end">
+        <Plus size={25} className="hover:bg-gray-100 rounded p-1" />
+        {id && <Trash2 size={25} className="hover:bg-gray-100 rounded p-1" onClick={deleteBlock} />}
       </div>
+    )}
+
+{showSizeControls && (
+      <div className="w-full mb-2 flex items-center gap-2 p-2 bg-gray-50 rounded">
+        <label className="text-xs">W:</label>
+        <input
+          value={dimensions.width}
+          onChange={handleWidthChange}
+          className="w-20 text-sm border rounded px-1"
+        />
+        <label className="text-xs">H:</label>
+        <input
+          value={dimensions.height}
+          onChange={handleHeightChange}
+          className="w-20 text-sm border rounded px-1"
+        />
+        <button
+          onClick={setFull}
+          className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+        >
+          Full
+        </button>
+        <button
+          onClick={setSmall}
+          className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+        >
+          Small
+        </button>
+      </div>
+    )}
+
+<div className="relative inline-block">
+      <img
+        ref={imgRef}
+        src={`${imageUrl}?width=${dimensions.width}&height=${dimensions.height}`}
+        alt=""
+        style={{ width: dimensions.width, height: dimensions.height }}
+        className="max-w-full"
+      />
+
+      {isHovered && (
+        <>
+          <div
+            className="absolute bottom-0 right-0 w-4 h-4 bg-white border border-gray-400 cursor-se-resize"
+            onMouseDown={(e) => startResize(e, "both")}
+            style={{ transform: "translate(25%,25%)" }}
+          />
+          <div
+            className="absolute bottom-0 left-1/2 w-4 h-4 bg-white border border-gray-400 cursor-s-resize"
+            onMouseDown={(e) => startResize(e, "height")}
+            style={{ transform: "translate(-50%,50%)" }}
+          />
+          <div
+            className="absolute top-1/2 right-0 w-4 h-4 bg-white border border-gray-400 cursor-e-resize"
+            onMouseDown={(e) => startResize(e, "width")}
+            style={{ transform: "translate(50%,-50%)" }}
+          />
+        </>
+      )}
     </div>
+  </div>
   );
 };
 

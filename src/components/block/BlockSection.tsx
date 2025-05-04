@@ -147,7 +147,7 @@ const BlockSection = ({
       document.removeEventListener("paste", handlePaste);
     };
   }, [blocks.length, pageId, isPastingImage, setBlocks]);
-
+  console.log(blocks)
   return (
     <div className="w-full flex flex-col items-center">
       {blocks.map((block: BlockProps, index: number) => {
