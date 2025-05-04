@@ -38,7 +38,7 @@ const BlockSection = ({
         const imagePath: string = JSON.parse(response.response).Key;
         const imageUrl =
           "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" +
-          imagePath;
+          imagePath + "?&height=auto&width=auto" ;
 
         const newBlockData = {
           content: imageUrl,
