@@ -6,8 +6,8 @@ pub async fn initialize_supabase_client() -> SupabaseClient {
     dotenv().ok(); // Load the .env file
 
     let supabase_client: SupabaseClient = SupabaseClient::new(
-        var("SUPABASE_URL").unwrap(),
-        var("SUPABASE_API_KEY").unwrap(),
+        var("VITE_SUPABASE_URL").unwrap(),
+        var("VITE_SUPABASE_API_KEY").unwrap(),
     )
     .unwrap();
 
