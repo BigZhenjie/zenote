@@ -107,12 +107,16 @@ const BlockSection = ({
             parentBlockId: null,
           };
 
-          setBlocks((prevBlocks) => {
-            // Insert the new image block before the empty block at the end
+          // Create new block BEFORE the empty block
+          setBlocks(prevBlocks => {
+            const insertionIndex = prevBlocks.length > 0 
+              ? prevBlocks.length - 1 
+              : 0;
+
             return [
-              ...prevBlocks.slice(0, -1),
+              ...prevBlocks.slice(0, insertionIndex),
               newBlock,
-              prevBlocks[prevBlocks.length - 1] // Keep the empty block at the end
+              ...prevBlocks.slice(insertionIndex)
             ];
           });
         }
@@ -122,13 +126,38 @@ const BlockSection = ({
     };
 
     const handlePaste = async (event: ClipboardEvent) => {
-      // Rest of the paste handling code remains the same
-      // ...
+      // Add immediate prevention for all paste events
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const now = Date.now();
+      if (now - lastPasteTimestampRef.current < 200 || isPastingImageRef.current) return;
+      lastPasteTimestampRef.current = now;
+
+      try {
+        isPastingImageRef.current = true;
+        const clipboardItems = await navigator.clipboard.read();
+
+        for (const item of clipboardItems) {
+          const imageType = item.types.find((type) => type.startsWith("image/"));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const arrayBuffer = await blob.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+
+            await createImageBlock(bytes);
+            break;
+          }
+        }
+      } catch (error) {
+        console.error("Failed to process pasted content:", error);
+      } finally {
+        isPastingImageRef.current = false;
+      }
     };
 
     document.addEventListener("paste", handlePaste, { capture: true });
-    return () =>
-      document.removeEventListener("paste", handlePaste, { capture: true });
+    return () => document.removeEventListener("paste", handlePaste, { capture: true });
   }, [pageId, setBlocks]);
 
   return (

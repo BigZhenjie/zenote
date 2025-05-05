@@ -166,36 +166,37 @@ const Block = ({
             setIsSaved(true);
             
             setBlocks((prevBlocks) => {
-              // Find our current position
-              const currentIndex = index;
+              // Create new array without modifying other blocks
+              const newBlocks = [...prevBlocks];
               
-              return [
-                ...prevBlocks.slice(0, currentIndex),
-                {
-                  id: newBlockId,
-                  content: content,
-                  type: type,
-                  order: currentIndex,
+              // Replace current temporary block with persisted version
+              newBlocks[index] = {
+                ...newBlocks[index],
+                id: newBlockId,
+                content: content,
+                type: type,
+                order: index,
+                pageId: pageId,
+                parentBlockId: parentBlockId || "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+
+              // Add new empty block only at the end
+              if (index === newBlocks.length - 1) {
+                newBlocks.push({
+                  id: "",
+                  content: "",
+                  type: "text",
+                  order: index + 1,
                   pageId: pageId,
                   parentBlockId: parentBlockId || "",
                   createdAt: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
-                },
-                // Only add a new temp block if there isn't already one at the end
-                ...(prevBlocks.length === currentIndex + 1 || prevBlocks[currentIndex + 1]?.id ? [
-                  {
-                    id: "",
-                    content: "",
-                    type: "text",
-                    order: currentIndex + 1,
-                    pageId: pageId,
-                    parentBlockId: parentBlockId || "",
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                  }
-                ] : []),
-                ...prevBlocks.slice(currentIndex + 1)
-              ];
+                });
+              }
+
+              return newBlocks;
             });
           }
         } else if (id) {
