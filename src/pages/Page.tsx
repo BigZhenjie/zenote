@@ -22,7 +22,6 @@ const Page = () => {
     debounce(async (title) => {
       // Your Supabase update code here
       if (!user) return;
-      console.log("Updating")
       try {
         await invoke("update_page", {
           pageId: pageId,

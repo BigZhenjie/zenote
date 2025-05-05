@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { debounce } from "lodash";
 import { BlockProps, Response } from "@/types";
@@ -20,10 +20,9 @@ type OptionalBlockProps = {
 };
 
 // Create a global flag to track paste processing across components
-// This is a simple but effective way to prevent duplicate handling
 const pasteProcessingFlag = {
   processing: false,
-  timestamp: 0
+  timestamp: 0,
 };
 
 const Block = ({
@@ -44,36 +43,42 @@ const Block = ({
   const [isTyping, setIsTyping] = useState(false);
   const [localContent, setLocalContent] = useState(content);
   const [imageSrc, setImageSrc] = useState("");
-
-  // Check both index and whether it's already been saved
-  const isNewBlock = index === blocks.length && !isSaved;
+  
+  // Generate a stable temporary ID for this block instance
+  const tempId = useRef(`temp-${Date.now()}-${Math.random()}`).current;
+  
+  // Identify if this is a new unsaved block
+  const isNewBlock = !id && !isSaved;
 
   const handlePaste = async (event: React.ClipboardEvent) => {
     // Skip if paste handling is disabled for this block
     if (!handlePasteInBlock) {
       return;
     }
-    
+
     // Skip if there's content in the block already
     if (localContent.trim() !== "") {
       return;
     }
-    
+
     // Check global paste flag - if it's been less than 200ms since last paste, skip
     const now = Date.now();
-    if (pasteProcessingFlag.processing || (now - pasteProcessingFlag.timestamp < 200)) {
+    if (
+      pasteProcessingFlag.processing ||
+      now - pasteProcessingFlag.timestamp < 200
+    ) {
       console.log("Skipping paste - already processing or too soon");
       return;
     }
-    
+
     try {
       // Set the global flag
       pasteProcessingFlag.processing = true;
       pasteProcessingFlag.timestamp = now;
-      
+
       // Stop event propagation
       event.stopPropagation();
-      
+
       if (!navigator.clipboard) {
         console.error("Clipboard API not available");
         return;
@@ -83,10 +88,12 @@ const Block = ({
       let hasHandledImage = false;
       try {
         const clipboardItems = await navigator.clipboard.read();
-        
+
         for (const clipboardItem of clipboardItems) {
-          const imageType = clipboardItem.types.find(type => type.startsWith('image/'));
-          
+          const imageType = clipboardItem.types.find((type) =>
+            type.startsWith("image/")
+          );
+
           if (imageType) {
             // Process the image
             const blob = await clipboardItem.getType(imageType);
@@ -97,14 +104,17 @@ const Block = ({
           }
         }
       } catch (clipboardErr) {
-        console.warn("Modern clipboard API failed, trying fallback", clipboardErr);
+        console.warn(
+          "Modern clipboard API failed, trying fallback",
+          clipboardErr
+        );
       }
-      
+
       // Fallback to older clipboard API if needed
       if (!hasHandledImage && event.clipboardData) {
         for (let i = 0; i < event.clipboardData.items.length; i++) {
           const item = event.clipboardData.items[i];
-          
+
           if (item.type.indexOf("image") !== -1) {
             const blob = item.getAsFile();
             if (blob) {
@@ -116,7 +126,6 @@ const Block = ({
           }
         }
       }
-      
     } catch (err) {
       console.error("Failed to read clipboard:", err);
     } finally {
@@ -133,13 +142,13 @@ const Block = ({
       try {
         if (isNewBlock && content.trim() !== "") {
           console.log("Creating new block with content:", content);
-          
+
           // Create new block
           const newBlockData = {
             content: content,
             pageId: pageId,
             blockType: type,
-            order: blocks.length,
+            order: index, // Use actual index from props
             parentBlockId: parentBlockId || null,
           };
 
@@ -153,35 +162,45 @@ const Block = ({
             const newBlockId =
               typeof blockData === "object" ? blockData.id : String(blockData);
 
-            // Update local state
+            // Update local state and mark as saved
             setIsSaved(true);
-            setBlocks((prevBlocks) => [
-              ...prevBlocks.slice(0, -1),
-              {
-                id: newBlockId,
-                content: content,
-                type: type,
-                order: blocks.length - 1,
-                pageId: pageId,
-                parentBlockId: parentBlockId || "",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-              {
-                id: "",
-                content: "",
-                type: "text",
-                order: blocks.length,
-                pageId: pageId,
-                parentBlockId: parentBlockId || "",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            ]);
+            
+            setBlocks((prevBlocks) => {
+              // Find our current position
+              const currentIndex = index;
+              
+              return [
+                ...prevBlocks.slice(0, currentIndex),
+                {
+                  id: newBlockId,
+                  content: content,
+                  type: type,
+                  order: currentIndex,
+                  pageId: pageId,
+                  parentBlockId: parentBlockId || "",
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                },
+                // Only add a new temp block if there isn't already one at the end
+                ...(prevBlocks.length === currentIndex + 1 || prevBlocks[currentIndex + 1]?.id ? [
+                  {
+                    id: "",
+                    content: "",
+                    type: "text",
+                    order: currentIndex + 1,
+                    pageId: pageId,
+                    parentBlockId: parentBlockId || "",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  }
+                ] : []),
+                ...prevBlocks.slice(currentIndex + 1)
+              ];
+            });
           }
         } else if (id) {
           console.log("Updating existing block:", id);
-          
+
           // Update existing block
           await invoke("update_block", {
             blockId: id,
@@ -203,7 +222,7 @@ const Block = ({
         console.error("Failed to save block:", error);
       }
     }, 1000),
-    [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId, setBlocks]
+    [id, pageId, type, index, parentBlockId, setBlocks, isNewBlock]
   );
 
   const deleteBlock = async (id: string) => {
@@ -221,7 +240,7 @@ const Block = ({
       console.log("Content changed, updating:", localContent);
       debouncedUpdate(localContent);
     }
-    
+
     return () => {
       debouncedUpdate.cancel();
     };
