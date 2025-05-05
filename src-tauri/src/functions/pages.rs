@@ -231,8 +231,8 @@ pub async fn update_page(
     }
 
     dotenv().ok();
-    let supabase_url = env::var("SUPABASE_URL").map_err(|e| e.to_string())?;
-    let supabase_key = env::var("SUPABASE_API_KEY").map_err(|e| e.to_string())?;
+    let supabase_url = env::var("VITE_SUPABASE_URL").map_err(|e| e.to_string())?;
+    let supabase_key = env::var("VITE_SUPABASE_API_KEY").map_err(|e| e.to_string())?;
 
     let body = serde_json::json!({
         "id": page_id,
@@ -273,12 +273,14 @@ pub async fn create_page(
     title: String,
     parent_page_id: Option<String>,
 ) -> Result<Response<serde_json::Value>, String> {
+
     dotenv().ok();
+    println!("Creating page with user_id: {}, page_id: {}, title: {}, parent_page_id: {:?}", user_id, page_id, title, parent_page_id);
 
     let supabase_url =
-        env::var("SUPABASE_URL").map_err(|_| "Missing SUPABASE_URL in .env".to_string())?;
+        env::var("VITE_SUPABASE_URL").map_err(|_| "Missing SUPABASE_URL in .env".to_string())?;
     let supabase_key =
-        env::var("SUPABASE_API_KEY").map_err(|_| "Missing SUPABASE_KEY in .env".to_string())?;
+        env::var("VITE_SUPABASE_API_KEY").map_err(|_| "Missing SUPABASE_KEY in .env".to_string())?;
 
     let client = Client::new();
     let mut payload = serde_json::json!({

@@ -1,10 +1,11 @@
 import { BlockProps } from "@/types";
 import Block from "./Block";
 import ImageBlock from "./ImageBlock";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Response } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+
 const BlockSection = ({
   blocks,
   setBlocks,
@@ -15,6 +16,7 @@ const BlockSection = ({
   pageId: string;
 }) => {
   const [isPastingImage, setIsPastingImage] = useState(false);
+  const lastPasteTimestampRef = useRef(0); // For deduplication
 
   useEffect(() => {
     const createImageBlock = async (bytes: Uint8Array) => {
@@ -38,7 +40,7 @@ const BlockSection = ({
         const imagePath: string = JSON.parse(response.response).Key;
         const imageUrl =
           "https://gzliirrtmmdeumryfouh.supabase.co/storage/v1/object/public/" +
-          imagePath + "?&height=auto&width=auto" ;
+          imagePath + "?&height=auto&width=auto";
 
         const newBlockData = {
           content: imageUrl,
@@ -79,79 +81,64 @@ const BlockSection = ({
             order: blocks.length,
             content: imageUrl,
             pageId: pageId,
-            parentBlockId: "",
+            parentBlockId: null,
           };
 
           setBlocks((prevBlocks) => [...prevBlocks, newBlock]);
         }
       } catch (error) {
         console.error("Failed to create image block:", error);
-      }
-    };
-
-    const handleLegacyPaste = (event: ClipboardEvent) => {
-      if (!event.clipboardData?.items) return;
-
-      for (let i = 0; i < event.clipboardData.items.length; i++) {
-        const item = event.clipboardData.items[i];
-
-        if (item.type.indexOf("image") !== -1) {
-          const blob = item.getAsFile();
-          if (!blob) continue;
-
-          const url = URL.createObjectURL(blob);
-          createImageBlock(url);
-          break;
-        }
-      }
-    };
-
-    const handlePaste = async (event: ClipboardEvent) => {
-      if (isPastingImage) return;
-
-      try {
-        if (navigator.clipboard) {
-          setIsPastingImage(true);
-
-          const clipboardItems = await navigator.clipboard.read();
-          let hasImage = false;
-
-          for (const item of clipboardItems) {
-            const imageType = item.types.find((type) =>
-              type.startsWith("image/")
-            );
-
-            if (imageType) {
-              hasImage = true;
-              const blob = await item.getType(imageType);
-              const arrayBuffer = await blob.arrayBuffer();
-              const bytes = new Uint8Array(arrayBuffer);
-
-              await createImageBlock(bytes);
-              break;
-            }
-          }
-          if (!hasImage && event.clipboardData) {
-            handleLegacyPaste(event);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to process pasted content:", error);
       } finally {
         setIsPastingImage(false);
       }
     };
-    document.addEventListener("paste", handlePaste);
+
+    const handlePaste = async (event: ClipboardEvent) => {
+      const now = Date.now();
+      if (now - lastPasteTimestampRef.current < 200) {
+        return;
+      }
+      lastPasteTimestampRef.current = now;
+
+      if (isPastingImage) {
+        return;
+      }
+
+      try {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          const imageType = item.types.find((type) => type.startsWith("image/"));
+          if (imageType) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            setIsPastingImage(true);
+
+            const blob = await item.getType(imageType);
+            const arrayBuffer = await blob.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+
+            await createImageBlock(bytes);
+            break;
+          }
+        }
+      } catch (error) {
+        console.error("Failed to process pasted content:", error);
+        setIsPastingImage(false);
+      }
+    };
+
+    document.addEventListener("paste", handlePaste, { capture: true });
 
     return () => {
-      document.removeEventListener("paste", handlePaste);
+      document.removeEventListener("paste", handlePaste, { capture: true });
     };
   }, [blocks.length, pageId, isPastingImage, setBlocks]);
-  console.log(blocks)
+
   return (
     <div className="w-full flex flex-col items-center">
       {blocks.map((block: BlockProps, index: number) => {
-        if (block.type == "image") {
+        if (block.type === "image") {
           return (
             <ImageBlock
               key={block.id}
@@ -179,22 +166,22 @@ const BlockSection = ({
             index={index}
             blocks={blocks}
             setBlocks={setBlocks}
+            handlePasteInBlock={false} // Disable paste handling in Block
           />
         );
       })}
 
-      {/* If you still want a "new block" at the end */}
       <Block
-        key="new-block" // Unique key for the new block
-        id={""} // No ID for new block
+        key="new-block"
+        id={""}
         pageId={pageId}
         blocks={blocks}
         setBlocks={setBlocks}
-        // Add any defaults for a new block
         type="text"
         content=""
         order={blocks.length}
         index={blocks.length}
+        handlePasteInBlock={false} // Disable paste handling in Block
       />
     </div>
   );

@@ -71,5 +71,5 @@ declare type BlockProps = {
   order: number;
   content: string;
   pageId: string;
-  parentBlockId: string;
+  parentBlockId: string | null;
 };

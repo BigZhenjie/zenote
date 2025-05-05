@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { debounce} from "lodash";
+import { debounce } from "lodash";
 import { BlockProps, Response } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
+
 type OptionalBlockProps = {
   id?: string;
   created_at?: string;
@@ -12,9 +13,17 @@ type OptionalBlockProps = {
   content?: string;
   pageId: string;
   parentBlockId?: string | null;
-  index: number; // Make index required to determine new vs existing block
+  index: number;
   blocks: BlockProps[];
   setBlocks: React.Dispatch<React.SetStateAction<BlockProps[]>>;
+  handlePasteInBlock?: boolean;
+};
+
+// Create a global flag to track paste processing across components
+// This is a simple but effective way to prevent duplicate handling
+const pasteProcessingFlag = {
+  processing: false,
+  timestamp: 0
 };
 
 const Block = ({
@@ -27,138 +36,203 @@ const Block = ({
   order,
   blocks,
   setBlocks,
+  handlePasteInBlock = true,
 }: OptionalBlockProps) => {
   const [isSaved, setIsSaved] = useState(!!id);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [localContent, setLocalContent] = useState(content);
-  const [imageSrc, setImageSrc] = useState('');
+  const [imageSrc, setImageSrc] = useState("");
 
-  const handlePaste = async (event) => {
+  // Check both index and whether it's already been saved
+  const isNewBlock = index === blocks.length && !isSaved;
+
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    // Skip if paste handling is disabled for this block
+    if (!handlePasteInBlock) {
+      return;
+    }
+    
+    // Skip if there's content in the block already
+    if (localContent.trim() !== "") {
+      return;
+    }
+    
+    // Check global paste flag - if it's been less than 200ms since last paste, skip
+    const now = Date.now();
+    if (pasteProcessingFlag.processing || (now - pasteProcessingFlag.timestamp < 200)) {
+      console.log("Skipping paste - already processing or too soon");
+      return;
+    }
+    
     try {
+      // Set the global flag
+      pasteProcessingFlag.processing = true;
+      pasteProcessingFlag.timestamp = now;
+      
+      // Stop event propagation
+      event.stopPropagation();
+      
       if (!navigator.clipboard) {
         console.error("Clipboard API not available");
         return;
       }
 
-      const clipboardItems = await navigator.clipboard.read();
-      for (const clipboardItem of clipboardItems) {
-        const imageTypes = clipboardItem.types.find(type => type.startsWith('image/'));
-
-        if (imageTypes) {
-          const blob = await clipboardItem.getType(imageTypes);
-          const url = URL.createObjectURL(blob);
-          setImageSrc(url);
-          break; // Assuming we need the first image
+      // Try to read images from clipboard
+      let hasHandledImage = false;
+      try {
+        const clipboardItems = await navigator.clipboard.read();
+        
+        for (const clipboardItem of clipboardItems) {
+          const imageType = clipboardItem.types.find(type => type.startsWith('image/'));
+          
+          if (imageType) {
+            // Process the image
+            const blob = await clipboardItem.getType(imageType);
+            const url = URL.createObjectURL(blob);
+            setImageSrc(url);
+            hasHandledImage = true;
+            break;
+          }
+        }
+      } catch (clipboardErr) {
+        console.warn("Modern clipboard API failed, trying fallback", clipboardErr);
+      }
+      
+      // Fallback to older clipboard API if needed
+      if (!hasHandledImage && event.clipboardData) {
+        for (let i = 0; i < event.clipboardData.items.length; i++) {
+          const item = event.clipboardData.items[i];
+          
+          if (item.type.indexOf("image") !== -1) {
+            const blob = item.getAsFile();
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              setImageSrc(url);
+              hasHandledImage = true;
+              break;
+            }
+          }
         }
       }
+      
     } catch (err) {
       console.error("Failed to read clipboard:", err);
+    } finally {
+      // Clear the global flag after a short delay
+      setTimeout(() => {
+        pasteProcessingFlag.processing = false;
+      }, 300);
     }
   };
-
-  // Check both index and whether it's already been saved
-  const isNewBlock = index === blocks.length && !isSaved;
 
   // Debounced update function for database
   const debouncedUpdate = useCallback(
     debounce(async (content: string) => {
       try {
-        if (isNewBlock) {
-          // Only create if there's content
-          if (content.trim() !== "") {
-            setIsTyping(true);
-            
-            const newBlockData = {
-              content: content,
-              pageId: pageId,
-              blockType: type || "text",
-              order: blocks.length,
-              parentBlockId: parentBlockId || null,
-            };
-            
-            // Call create_block API
-            const response: Response = await invoke("create_block", newBlockData);
-            
-            // Mark block as saved to prevent repeating
+        if (isNewBlock && content.trim() !== "") {
+          console.log("Creating new block with content:", content);
+          
+          // Create new block
+          const newBlockData = {
+            content: content,
+            pageId: pageId,
+            blockType: type,
+            order: blocks.length,
+            parentBlockId: parentBlockId || null,
+          };
+
+          const response: Response = await invoke("create_block", newBlockData);
+
+          if (response && response.data && response.status === 200) {
+            const blockData = Array.isArray(response.data)
+              ? response.data[0]
+              : response.data;
+
+            const newBlockId =
+              typeof blockData === "object" ? blockData.id : String(blockData);
+
+            // Update local state
             setIsSaved(true);
-            
-            if (response.data && response.status === 200) {
-              // Extract the first item if response.data is an array
-              const blockData = Array.isArray(response.data) ? response.data[0] : response.data;
-              // Create new block with correct structure
-              const newBlock: BlockProps = {
-                // Handle case where blockData is just the ID number
-                id: typeof blockData === 'object' ? (blockData.id || "") : String(blockData),
-                createdAt: typeof blockData === 'object' ? (blockData.created_at || new Date().toISOString()) : new Date().toISOString(),
-                updatedAt: typeof blockData === 'object' ? (blockData.updated_at || new Date().toISOString()) : new Date().toISOString(),
-                type: newBlockData.blockType,
-                order: newBlockData.order,
-                content: newBlockData.content,
-                pageId: newBlockData.pageId,
-                parentBlockId: newBlockData.parentBlockId || "",
-              };
-              
-              // Add the new block to the state - important to use a callback to ensure we have the latest state
-              setBlocks(prevBlocks => [...prevBlocks, newBlock]);
-              
-              // Reset local content for this component
-              setLocalContent("");
-              
-              // Reset isSaved state to allow this component to create another block
-              // This is crucial - without it the component won't recognize itself as a "new block" creator again
-              setTimeout(() => {
-                setIsSaved(false);
-              }, 100);
-            }
+            setBlocks((prevBlocks) => [
+              ...prevBlocks.slice(0, -1),
+              {
+                id: newBlockId,
+                content: content,
+                type: type,
+                order: blocks.length - 1,
+                pageId: pageId,
+                parentBlockId: parentBlockId || "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              {
+                id: "",
+                content: "",
+                type: "text",
+                order: blocks.length,
+                pageId: pageId,
+                parentBlockId: parentBlockId || "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            ]);
           }
         } else if (id) {
+          console.log("Updating existing block:", id);
+          
           // Update existing block
           await invoke("update_block", {
             blockId: id,
             content: content,
             pageId: pageId,
-            parentBlockId: parentBlockId,
-            order: order,
+            parentBlockId: parentBlockId || null,
+            order: index,
             blockType: type,
           });
-          
-          // Update the block in the state
-          setBlocks(prevBlocks =>
-            prevBlocks.map(block => 
-              block.id === id 
-                ? { ...block, content, updatedAt: new Date().toISOString() }
-                : block
+
+          // Update local state
+          setBlocks((prevBlocks) =>
+            prevBlocks.map((block) =>
+              block.id === id ? { ...block, content: content } : block
             )
           );
         }
       } catch (error) {
-        console.error(`Failed to ${isNewBlock ? "create" : "update"} block:`, error);
-      } finally {
-        setIsTyping(false);
+        console.error("Failed to save block:", error);
       }
     }, 1000),
-    [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId]
+    [isNewBlock, isSaved, id, pageId, type, order, blocks.length, parentBlockId, setBlocks]
   );
 
   const deleteBlock = async (id: string) => {
     try {
       await invoke("delete_block", { blockId: id });
-      setBlocks(prevBlocks => prevBlocks.filter(block => block.id !== id));
+      setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
     } catch (error) {
       console.error("Failed to delete block:", error);
     }
-  }
+  };
 
-useEffect(() => {
-  if (localContent !== content) {
-    debouncedUpdate(localContent);
+  // Call debouncedUpdate when content changes
+  useEffect(() => {
+    if (localContent !== content) {
+      console.log("Content changed, updating:", localContent);
+      debouncedUpdate(localContent);
+    }
+    
     return () => {
-      debouncedUpdate.cancel(); // Cancel pending debounces on cleanup
+      debouncedUpdate.cancel();
     };
-  }
-}, [localContent, content, debouncedUpdate]);
+  }, [localContent, content, debouncedUpdate]);
+
+  // Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newContent = e.target.value;
+    setLocalContent(newContent);
+    setIsTyping(true);
+  };
 
   return (
     <div
@@ -168,16 +242,15 @@ useEffect(() => {
     >
       {isHovered && (
         <div className="absolute left-0 translate-x-[-100%] flex justify-end">
-        <Plus
-          size={25}
-          className="hover:bg-gray-100 rounded-md p-1"
-        />
-        {id && <Trash2 
-          size={25}
-          className=" hover:bg-gray-100 rounded-md p-1"
-          onClick={() => deleteBlock(id)}
-        />}
-      </div>
+          <Plus size={25} className="hover:bg-gray-100 rounded-md p-1" />
+          {id && (
+            <Trash2
+              size={25}
+              className="hover:bg-gray-100 rounded-md p-1"
+              onClick={() => deleteBlock(id)}
+            />
+          )}
+        </div>
       )}
 
       {imageSrc ? (
@@ -185,7 +258,7 @@ useEffect(() => {
       ) : (
         <input
           value={localContent}
-          onChange={(e) => setLocalContent(e.target.value)}
+          onChange={handleChange}
           type="text"
           className="w-full outline-none row-auto hover:border-gray-200 focus:border-gray-300 transition-colors h-auto"
           placeholder={isFocused || isNewBlock ? "Type your text here..." : ""}
@@ -194,10 +267,6 @@ useEffect(() => {
           onPaste={handlePaste}
         />
       )}
-      
-      {/* {isTyping && (
-        <span className="text-xs text-gray-400 ml-2">Saving...</span>
-      )} */}
     </div>
   );
 };
