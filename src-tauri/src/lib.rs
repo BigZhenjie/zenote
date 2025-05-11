@@ -23,6 +23,11 @@ use crate::functions::blocks::update_block;
 use crate::functions::blocks::create_block;
 use crate::functions::blocks::delete_block;
 
+// Add these new imports for your RAG system
+use crate::functions::embeddings::index_block;
+use crate::functions::embeddings::query_similar_blocks;
+use crate::functions::embeddings::ask_llm;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -41,6 +46,9 @@ pub fn run() {
             update_block,
             create_block,
             delete_block,
+            index_block,
+            query_similar_blocks,
+            ask_llm,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
