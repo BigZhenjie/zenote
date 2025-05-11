@@ -148,7 +148,7 @@ const Block = ({
             content: content,
             pageId: pageId,
             blockType: type,
-            order: index, // Use actual index from props
+            order: index, 
             parentBlockId: parentBlockId || null,
           };
 
@@ -164,6 +164,21 @@ const Block = ({
 
             // Update local state and mark as saved
             setIsSaved(true);
+            
+            // *** Add embedding creation here ***
+            if (content.trim().length > 10) {  // Only index substantial content
+              try {
+                await invoke("index_block", {
+                  blockId: newBlockId,
+                  content: content,
+                  pageId: pageId,
+                  metadata: { type: type }
+                });
+                console.log("Block indexed successfully");
+              } catch (error) {
+                console.error("Failed to index block:", error);
+              }
+            }
             
             setBlocks((prevBlocks) => {
               // Create new array without modifying other blocks
@@ -211,6 +226,21 @@ const Block = ({
             order: index,
             blockType: type,
           });
+
+          // *** Add embedding update here ***
+          if (content.trim().length > 10) {  // Only index substantial content
+            try {
+              await invoke("index_block", {
+                blockId: id,
+                content: content,
+                pageId: pageId,
+                metadata: { type: type }
+              });
+              console.log("Block indexed successfully");
+            } catch (error) {
+              console.error("Failed to index block:", error);
+            }
+          }
 
           // Update local state
           setBlocks((prevBlocks) =>

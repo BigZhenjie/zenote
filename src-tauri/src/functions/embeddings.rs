@@ -89,7 +89,7 @@ pub async fn index_block(
         }),
     };
 
-    // Store the embedding in Supabase
+    // Store the embedding in Supabase using upsert
     let client = Client::new();
     let endpoint = format!("{}/rest/v1/embeddings", supabase_url);
     
@@ -106,6 +106,7 @@ pub async fn index_block(
         .header("apikey", &supabase_key)
         .header("Authorization", format!("Bearer {}", supabase_key))
         .header("Content-Type", "application/json")
+        .header("Prefer", "resolution=merge-duplicates") // This enables upsert based on unique constraints
         .json(&body)
         .send()
         .await
