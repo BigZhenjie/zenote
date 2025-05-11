@@ -5,3 +5,4 @@ pub mod queries;
 pub mod pages;
 pub mod responses;
 pub mod blocks;
+pub mod embeddings;
