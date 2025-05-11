@@ -10,6 +10,7 @@ import Page from "./pages/Page";
 // Lazy imports
 const Login = lazy(() => import("./pages/Login"));
 const OnBoarding = lazy(() => import("./pages/OnBoarding"));
+const Chat = lazy(() => import("./pages/Chat"));
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
             <Route element={<Layout children={<Outlet />} />}>
               <Route path="/home" element={<Home />} />
               <Route path="/:pageId" element={<Page />} />
+              <Route path="/chat" element={<Chat />} />
+
               {/*route for 404*/}
               <Route path="*" element={<div>404</div>} />
             </Route>
