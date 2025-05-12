@@ -201,28 +201,43 @@ pub async fn ask_llm(
     let client = Client::new();
     let url = "https://api.openai.com/v1/chat/completions";
     
-    // Prepare system message with or without context
-    let system_message = match context {
-        Some(ctx) => format!(
-            "You are a helpful assistant for the note-taking app called ZeNote. Answer the user's question based on their notes. Here is the relevant context from their notes:\n\n{}", 
-            ctx
-        ),
-        None => "You are a helpful assistant for the note-taking app called ZeNote. Answer the user's question as clearly and concisely as possible.".to_string(),
+    // Create messages array with appropriate system and user content
+    let mut messages = Vec::new();
+    
+    // System message with context
+    let system_message = match &context {
+        Some(ctx) => json!({
+            "role": "system",
+            "content": format!(
+                "You are a helpful assistant for the note-taking app called ZeNote. Answer the user's question based on their notes and previous conversation. Be specific and reference information from their notes when relevant.",
+            )
+        }),
+        None => json!({
+            "role": "system",
+            "content": "You are a helpful assistant for the note-taking app called ZeNote. Answer the user's question as clearly and concisely as possible."
+        }),
     };
+    
+    messages.push(system_message);
+    
+    // Add context as a separate system message if available
+    if let Some(ctx) = context {
+        messages.push(json!({
+            "role": "system",
+            "content": ctx
+        }));
+    }
+    
+    // Add the user query
+    messages.push(json!({
+        "role": "user",
+        "content": query
+    }));
     
     // Prepare the request body
     let body = json!({
         "model": "gpt-4o",
-        "messages": [
-            {
-                "role": "system",
-                "content": system_message
-            },
-            {
-                "role": "user",
-                "content": query
-            }
-        ],
+        "messages": messages,
         "temperature": 0.7
     });
     

@@ -20,7 +20,7 @@ const BlockSection = ({
   blocksRef.current = blocks;
 
   const lastPasteTimestampRef = useRef(0); // For deduplication
-  
+  console.log("blocks", blocks);
   // Ensure there is always one empty block at the end
   useEffect(() => {
     if (blocks.length === 0 || blocks[blocks.length - 1].id) {

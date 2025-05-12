@@ -40,26 +40,42 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
+      // Format recent chat history (last 6 messages)
+      const recentMessages = messages.slice(-6);
+      const chatHistory = recentMessages.map(msg => 
+        `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+      ).join('\n\n');
+      
       // First retrieve similar blocks from the user's notes
       const similarBlocksResponse: Response = await invoke("query_similar_blocks", {
-        query: input,
-        threshold: 0.75, // Similarity threshold
+        // Include recent chat context in the query for better semantic search
+        query: `${chatHistory ? chatHistory + '\n\n' : ''}${input}`,
+        threshold: 0.65, // Slightly lower threshold to account for longer query
         limit: 5 // Number of blocks to retrieve
       });
-
-      let context = "";
+      
+      console.log("similarBlocksResponse", similarBlocksResponse);
+      let retrievedContext = "";
       
       // Extract content from similar blocks to build context
       if (similarBlocksResponse.data && Array.isArray(similarBlocksResponse.data)) {
-        context = similarBlocksResponse.data
+        retrievedContext = similarBlocksResponse.data
           .map((block: any) => `Block from page ${block.page_id}: ${block.content}`)
           .join("\n\n");
       }
+      
+      // Combine retrieved context with chat history
+      const fullContext = [
+        // Include chat history first
+        chatHistory ? `Recent conversation:\n${chatHistory}` : null,
+        // Then add retrieved blocks
+        retrievedContext ? `Relevant notes:\n${retrievedContext}` : null
+      ].filter(Boolean).join('\n\n');
 
-      // Now query the LLM with the context
+      // Now query the LLM with the combined context
       const llmResponse: Response = await invoke("ask_llm", {
         query: input,
-        context: context.length > 0 ? context : null
+        context: fullContext.length > 0 ? fullContext : null
       });
 
       if (llmResponse.data) {
