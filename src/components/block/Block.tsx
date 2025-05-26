@@ -3,6 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { debounce } from "lodash";
 import { BlockProps, Response } from "@/types";
 import { invoke } from "@tauri-apps/api/core";
+import { useAuth } from "@/context/AuthContext"; // Assuming you have an AuthContext
 
 type OptionalBlockProps = {
   id?: string;
@@ -43,6 +44,7 @@ const Block = ({
   const [isTyping, setIsTyping] = useState(false);
   const [localContent, setLocalContent] = useState(content);
   const [imageSrc, setImageSrc] = useState("");
+  const { user } = useAuth(); // Get user from AuthContext
   
   // Generate a stable temporary ID for this block instance
   const tempId = useRef(`temp-${Date.now()}-${Math.random()}`).current;
@@ -139,6 +141,11 @@ const Block = ({
   // Debounced update function for database
   const debouncedUpdate = useCallback(
     debounce(async (content: string) => {
+      if (!user || !user.id) {
+        console.error("User ID not available. Cannot save or index block.");
+        return;
+      }
+
       try {
         if (isNewBlock && content.trim() !== "") {
           console.log("Creating new block with content:", content);
@@ -172,7 +179,8 @@ const Block = ({
                   blockId: newBlockId,
                   content: content,
                   pageId: pageId,
-                  metadata: { type: type }
+                  metadata: { type: type },
+                  userId: user.id // Pass user.id
                 });
                 console.log("Block indexed successfully");
               } catch (error) {
@@ -230,11 +238,13 @@ const Block = ({
           // *** Add embedding update here ***
           if (content.trim().length > 10) {  // Only index substantial content
             try {
-              await invoke("index_block", {
+              console.log("Indexing block:", id);
+              await invoke("index_block", { // Also used for updates (upsert behavior)
                 blockId: id,
                 content: content,
                 pageId: pageId,
-                metadata: { type: type }
+                metadata: { type: type },
+                userId: user.id // Pass user.id
               });
               console.log("Block indexed successfully");
             } catch (error) {
@@ -253,7 +263,7 @@ const Block = ({
         console.error("Failed to save block:", error);
       }
     }, 1000),
-    [id, pageId, type, index, parentBlockId, setBlocks, isNewBlock]
+    [id, pageId, type, index, parentBlockId, setBlocks, isNewBlock, user] // Add user to dependencies
   );
 
   const deleteBlock = async (id: string) => {

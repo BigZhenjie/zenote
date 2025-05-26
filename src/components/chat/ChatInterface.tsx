@@ -11,6 +11,17 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+// Define the structure of a block returned by the query_similar_blocks command
+interface RetrievedBlock {
+  // Adjust these fields based on what your 'match_embeddings' SQL function actually returns
+  // and what you need in the frontend.
+  page_id: string; // Or number, if that's the type from Supabase
+  content: string;
+  id?: string; // Example: if you also return the block's own ID
+  similarity?: number; // Example: if you return the similarity score
+  // Add other fields like block_id, metadata if needed
+}
+
 const ChatInterface = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -25,7 +36,21 @@ const ChatInterface = () => {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !user) return;
+    if (!input.trim() || !user || !user.id) { // Ensure user and user.id exist
+      console.error("User or user ID is not available.");
+      // Optionally, show an error message to the user
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: "Error: Could not identify user. Please try logging in again.",
+          timestamp: new Date(),
+        }
+      ]);
+      setIsLoading(false);
+      return;
+    }
 
     // Add user message
     const userMessage: ChatMessage = {
@@ -50,8 +75,9 @@ const ChatInterface = () => {
       const similarBlocksResponse: Response = await invoke("query_similar_blocks", {
         // Include recent chat context in the query for better semantic search
         query: `${chatHistory ? chatHistory + '\n\n' : ''}${input}`,
-        threshold: 0.65, // Slightly lower threshold to account for longer query
-        limit: 5 // Number of blocks to retrieve
+        threshold: 0.1, // Slightly lower threshold to account for longer query
+        limit: 5, // Number of blocks to retrieve
+        userId: user.id // Pass the user ID
       });
       
       console.log("similarBlocksResponse", similarBlocksResponse);
@@ -60,7 +86,7 @@ const ChatInterface = () => {
       // Extract content from similar blocks to build context
       if (similarBlocksResponse.data && Array.isArray(similarBlocksResponse.data)) {
         retrievedContext = similarBlocksResponse.data
-          .map((block: any) => `Block from page ${block.page_id}: ${block.content}`)
+          .map((block: RetrievedBlock) => `Block from page ${block.page_id}: ${block.content}`)
           .join("\n\n");
       }
       
