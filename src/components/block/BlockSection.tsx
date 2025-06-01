@@ -20,10 +20,22 @@ const BlockSection = ({
   blocksRef.current = blocks;
 
   const lastPasteTimestampRef = useRef(0); // For deduplication
-  console.log("blocks", blocks);
+  console.log("blocks passed into BlockSection: ", blocks);
   // Ensure there is always one empty block at the end
   useEffect(() => {
-    if (blocks.length === 0 || blocks[blocks.length - 1].id) {
+    const shouldAddEmptyBlock = () => {
+      if (blocks.length === 0) {
+        return true; // Always add if no blocks
+      }
+      const lastBlock = blocks[blocks.length - 1];
+      // Add if last block is saved (has ID) AND has actual content (not just whitespace)
+      if (lastBlock.id && lastBlock.content && lastBlock.content.trim() !== "") {
+        return true;
+      }
+      return false;
+    };
+
+    if (shouldAddEmptyBlock()) {
       setBlocks(prevBlocks => [
         ...prevBlocks,
         {
