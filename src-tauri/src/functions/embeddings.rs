@@ -100,17 +100,14 @@ pub async fn index_block(
     };
 
     let client = Client::new();
-    // IMPORTANT: Replace `block_id` in `on_conflict=block_id` with the actual column(s) 
-    // that define the unique constraint for conflict resolution in your 'embeddings' table.
-    // This could be just `block_id` if it's unique, or a composite like `block_id,user_id`.
-    // Ensure this constraint exists in your Supabase table.
-    let endpoint = format!("{}/rest/v1/embeddings?on_conflict=block_id", supabase_url); 
+    // Updated to use composite primary key (block_id, page_id) for conflict resolution
+    let endpoint = format!("{}/rest/v1/embeddings?on_conflict=block_id,page_id", supabase_url); 
 
     let body = json!({
-        "block_id": block_id.clone(), // Ensure block_id is part of the body for upsert matching
+        "block_id": block_id.clone(), // Required for composite key matching
         "content": content,
         "embedding": embedding,
-        "page_id": page_id,
+        "page_id": page_id, // Required for composite key matching
         "metadata": metadata,
         "user_id": user_id 
     });
@@ -226,8 +223,7 @@ pub async fn query_similar_blocks(
         "query_embedding": embedding,
         "match_threshold": threshold,
         "match_count": limit,
-        "p_user_id": user_id // Pass user_id to the RPC function
-                            // Naming it p_user_id as a common convention for parameters in pg functions
+        "p_user_id": user_id // Send as text instead of converting to i64
     });
         
     let response = client
